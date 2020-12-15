@@ -1,0 +1,49 @@
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 1
+block 1 name "poroelastic"
+
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "x_pos" add node in surface 6
+nodeset 1 group x_pos
+nodeset 1 name "x_pos"
+
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 4
+nodeset 2 group x_neg
+nodeset 2 name "x_neg"
+
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 5
+nodeset 3 group y_pos
+nodeset 3 name "y_pos"
+
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface  3
+nodeset 4 group y_neg
+nodeset 4 name "y_neg"
+
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 2
+nodeset 5 group z_neg
+nodeset 5 name "z_neg"
+
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "z_pos" add node in surface 1
+nodeset 6 group z_pos
+nodeset 6 name "z_pos"
+
+
