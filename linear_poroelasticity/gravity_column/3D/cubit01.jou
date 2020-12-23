@@ -1,0 +1,3643 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 12/18/2020 04:25:58 PM
+## Command Options:
+undo on
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/fault_diffusion/2D"
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# Create quad mesh at 4 km resolution.
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# CUBIT journal file with geometry for 2-D strike-slip example.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Make sure undo is off to prevent errors in stitching volumes.
+undo off
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 150.0 km x 100.0 km
+# -50.0 km <= x <= 50.0 km
+# -75.0 km <= y <= 75.0 km
+${blockWidth=100*km}
+${blockLength=150*km}
+${blockHeight=10*km}
+${faultLength=150.0*km}
+brick x {blockWidth} y {blockLength} z {blockHeight}
+${idV=Id("volume")}
+# surface 1 name "surf_front"
+surface ( at 0 0 5000 ordinal 1 ordered ) name "surf_front"
+# surface 2 name "surf_back"
+surface ( at 0 0 -5000 ordinal 1 ordered ) name "surf_back"
+create midsurface volume {idV}  surf_front surf_back
+${idS=Id("surface")}
+delete volume {idV} 
+# ----------------------------------------------------------------------
+# Create interface surfaces
+# ----------------------------------------------------------------------
+# Create fault (yz plane) at x = 0.0
+split surface {idS}  across location position 0 {-blockLength/2.0} 0 location position 0 {blockLength/2.0} 0
+# curve 17 name "fault_surface"
+curve ( at 0 0 0 ordinal 1 ordered ) name "fault_surface"
+# ----------------------------------------------------------------------
+# Name surfaces
+# ----------------------------------------------------------------------
+# surface 8 name "surface_xpos"
+surface ( at 25000 0 0 ordinal 1 ordered ) name "surface_xpos"
+# surface 9 name "surface_xneg"
+surface ( at -25000 0 0 ordinal 1 ordered ) name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name curves
+# ----------------------------------------------------------------------
+# curve 19 name "edge_ypos_xpos"
+curve ( at 25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xpos"
+# curve 20 name "edge_ypos_xneg"
+curve ( at -25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xneg"
+# curve 18 name "edge_yneg_xpos"
+curve ( at 25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xpos"
+# curve 21 name "edge_yneg_xneg"
+curve ( at -25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xneg"
+# curve 14 name "edge_xpos"
+curve ( at 50000 0 0 ordinal 1 ordered ) name "edge_xpos"
+# curve 16 name "edge_xneg"
+curve ( at -50000 0 0 ordinal 1 ordered ) name "edge_xneg"
+# ----------------------------------------------------------------------
+# Name vertices
+# ----------------------------------------------------------------------
+# vertex 14 name "vertex_fault_ypos"
+vertex ( at 0 75000 0 ordinal 1 ordered ) name "vertex_fault_ypos"
+# vertex 13 name "vertex_fault_yneg"
+vertex ( at 0 -75000 0 ordinal 1 ordered ) name "vertex_fault_yneg"
+# vertex 11 name "vertex_ypos_xpos"
+vertex ( at 50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xpos"
+# vertex 12 name "vertex_ypos_xneg"
+vertex ( at -50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xneg"
+# vertex 9 name "vertex_yneg_xpos"
+vertex ( at 50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xpos"
+# vertex 10 name "vertex_yneg_xneg"
+vertex ( at -50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xneg"
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve fault_surface size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start fault_surface factor {bias_factor}
+# End of file
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at -25000 0 0 ordinal 1 ordered )  name "elastic_xneg"
+block 2 surface_xpos
+block  ( at 25000 0 0 ordinal 1 ordered )  name "elastic_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for fault
+# ----------------------------------------------------------------------
+group "fault" add node in fault_surface
+nodeset 10 fault
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "fault"
+# ----------------------------------------------------------------------
+# Create nodeset for +x face
+# ----------------------------------------------------------------------
+group "face_xpos" add node in edge_xpos
+nodeset 21 face_xpos
+nodeset  ( at 50000 0 0 ordinal 1 ordered )  name "face_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x face
+# ----------------------------------------------------------------------
+group "face_xneg" add node in edge_xneg
+nodeset 22 face_xneg
+nodeset  ( at -50000 0 0 ordinal 1 ordered )  name "face_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y face
+# ----------------------------------------------------------------------
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 23 face_ypos
+nodeset  ( at 0 75000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y face
+# ----------------------------------------------------------------------
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 24 face_yneg
+nodeset  ( at 0 -75000 0 ordinal 1 ordered )  name "face_yneg"
+# End of file
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+# ----------------------------------------------------------------------
+# Create quad mesh at 4 km resolution.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Make sure undo is off to prevent errors in stitching volumes.
+undo off
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 150.0 km x 100.0 km
+# -50.0 km <= x <= 50.0 km
+# -75.0 km <= y <= 75.0 km
+${blockWidth=100*km}
+${blockLength=150*km}
+${blockHeight=10*km}
+${faultLength=150.0*km}
+brick x {blockWidth} y {blockLength} z {blockHeight}
+${idV=Id("volume")}
+# surface 1 name "surf_front"
+surface ( at 0 0 5000 ordinal 1 ordered ) name "surf_front"
+# surface 2 name "surf_back"
+surface ( at 0 0 -5000 ordinal 1 ordered ) name "surf_back"
+create midsurface volume {idV}  surf_front surf_back
+${idS=Id("surface")}
+delete volume {idV} 
+# ----------------------------------------------------------------------
+# Create interface surfaces
+# ----------------------------------------------------------------------
+# Create fault (yz plane) at x = 0.0
+split surface {idS}  across location position 0 {-blockLength/2.0} 0 location position 0 {blockLength/2.0} 0
+# curve 17 name "fault_surface"
+curve ( at 0 0 0 ordinal 1 ordered ) name "fault_surface"
+# ----------------------------------------------------------------------
+# Name surfaces
+# ----------------------------------------------------------------------
+# surface 8 name "surface_xpos"
+surface ( at 25000 0 0 ordinal 1 ordered ) name "surface_xpos"
+# surface 9 name "surface_xneg"
+surface ( at -25000 0 0 ordinal 1 ordered ) name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name curves
+# ----------------------------------------------------------------------
+# curve 19 name "edge_ypos_xpos"
+curve ( at 25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xpos"
+# curve 20 name "edge_ypos_xneg"
+curve ( at -25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xneg"
+# curve 18 name "edge_yneg_xpos"
+curve ( at 25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xpos"
+# curve 21 name "edge_yneg_xneg"
+curve ( at -25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xneg"
+# curve 14 name "edge_xpos"
+curve ( at 50000 0 0 ordinal 1 ordered ) name "edge_xpos"
+# curve 16 name "edge_xneg"
+curve ( at -50000 0 0 ordinal 1 ordered ) name "edge_xneg"
+# ----------------------------------------------------------------------
+# Name vertices
+# ----------------------------------------------------------------------
+# vertex 14 name "vertex_fault_ypos"
+vertex ( at 0 75000 0 ordinal 1 ordered ) name "vertex_fault_ypos"
+# vertex 13 name "vertex_fault_yneg"
+vertex ( at 0 -75000 0 ordinal 1 ordered ) name "vertex_fault_yneg"
+# vertex 11 name "vertex_ypos_xpos"
+vertex ( at 50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xpos"
+# vertex 12 name "vertex_ypos_xneg"
+vertex ( at -50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xneg"
+# vertex 9 name "vertex_yneg_xpos"
+vertex ( at 50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xpos"
+# vertex 10 name "vertex_yneg_xneg"
+vertex ( at -50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xneg"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve fault_surface size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start fault_surface factor {bias_factor}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at -25000 0 0 ordinal 1 ordered )  name "elastic_xneg"
+block 2 surface_xpos
+block  ( at 25000 0 0 ordinal 1 ordered )  name "elastic_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for fault
+# ----------------------------------------------------------------------
+group "fault" add node in fault_surface
+nodeset 10 fault
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "fault"
+# ----------------------------------------------------------------------
+# Create nodeset for +x face
+# ----------------------------------------------------------------------
+group "face_xpos" add node in edge_xpos
+nodeset 21 face_xpos
+nodeset  ( at 50000 0 0 ordinal 1 ordered )  name "face_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x face
+# ----------------------------------------------------------------------
+group "face_xneg" add node in edge_xneg
+nodeset 22 face_xneg
+nodeset  ( at -50000 0 0 ordinal 1 ordered )  name "face_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y face
+# ----------------------------------------------------------------------
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 23 face_ypos
+nodeset  ( at 0 75000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y face
+# ----------------------------------------------------------------------
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 24 face_yneg
+nodeset  ( at 0 -75000 0 ordinal 1 ordered )  name "face_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+create vertex {fault1xpos} {-1*height} 0
+create vertex {fault1xpos + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos + fault1width/2} {-1*height} 0
+create vertex {fault1xpos + fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos - fault1width/2} {-1*height} 0
+create vertex {fault1xpos - fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+surface {Id("surface")}  name "FZ1"
+create vertex {fault2xpos} {-1*height} 0
+create vertex {fault2xpos + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos + fault2width/2} {-1*height} 0
+create vertex {fault2xpos + fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos - fault2width/2} {-1*height} 0
+create vertex {fault2xpos - fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+surface {Id("surface")}  name "FZ2"
+merge all
+create vertex {fault3xpos} {-1*height} 0
+create vertex {fault3xpos + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos + fault3width/2} {-1*height} 0
+create vertex {fault3xpos + fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos - fault3width/2} {-1*height} 0
+create vertex {fault3xpos - fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+surface {Id("surface")}  name "FZ3"
+merge all
+delete surface {Id("surface")-2} Surface {Id("surface")-3} 
+surface {Id("surface")}  rename "EastBasement"
+surface {Id("surface")-1}  rename "WestBasement"
+curve  ( at 2278.68 -2200 0 ordinal 1 ordered )  size 15
+mesh curve  ( at 2278.68 -2200 0 ordinal 1 ordered ) 
+surface WestBasement EastBasement size 30
+block 3 WestBasement
+block  ( at 7500 -1700 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -1700 0 ordinal 1 ordered )  name "WestBasement"
+block 4 EastBasement
+block  ( at 7500 -300 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -300 0 ordinal 1 ordered )  name "EastBasement"
+create sideset 1 curve 3
+nodeset 1 curve  ( at 7500 -2700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 1 ordered )  name "floor"
+nodeset  ( at 7500 -2700 0 ordinal 1 ordered )  name "floor"
+create sideset 2 curve 1
+nodeset 2 curve  ( at 7500 0 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 2 ordered )  name "surface"
+create sideset 3 curve 14
+nodeset 3 curve  ( at 15000 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 3 ordered )  name "BasementWest"
+nodeset  ( at 15000 -1700 0 ordinal 1 ordered )  name "BasementWest"
+create sideset 4 curve 6
+sideset  ( at 0 0 0 ordinal 4 ordered )  name "FormationWest"
+create sideset 5 curve 18
+nodeset 5 curve  ( at 2298.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 5 ordered )  name "MudWest"
+nodeset  ( at 2298.68 -2200 0 ordinal 1 ordered )  name "MudWest"
+create sideset 6 curve 17
+nodeset 6 curve  ( at 2288.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 6 ordered )  name "MudEast"
+nodeset  ( at 2288.68 -2200 0 ordinal 1 ordered )  name "MudEast"
+create sideset 7 curve 8
+sideset  ( at 0 0 0 ordinal 7 ordered )  name "FormationEast"
+create sideset 8 curve 15
+nodeset 8 curve  ( at 15000 -300 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 8 ordered )  name "BasementEast"
+nodeset  ( at 15000 -300 0 ordinal 1 ordered )  name "BasementEast"
+create sideset 9 curve 19
+nodeset 9 curve  ( at 2278.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 9 ordered )  name "Fault1"
+nodeset  ( at 2278.68 -2200 0 ordinal 1 ordered )  name "Fault1"
+create sideset 10 curve 26
+sideset  ( at 0 0 0 ordinal 10 ordered )  name "Fault2"
+create sideset 11 curve 33
+sideset  ( at 0 0 0 ordinal 11 ordered )  name "Fault3"
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+create vertex {fault1xpos} {-1*height} 0
+create vertex {fault1xpos + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos + fault1width/2} {-1*height} 0
+create vertex {fault1xpos + fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos - fault1width/2} {-1*height} 0
+create vertex {fault1xpos - fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ1"
+create vertex {fault2xpos} {-1*height} 0
+create vertex {fault2xpos + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos + fault2width/2} {-1*height} 0
+create vertex {fault2xpos + fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos - fault2width/2} {-1*height} 0
+create vertex {fault2xpos - fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+surface {Id("surface")}  name "FZ2"
+merge all
+create vertex {fault3xpos} {-1*height} 0
+create vertex {fault3xpos + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos + fault3width/2} {-1*height} 0
+create vertex {fault3xpos + fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos - fault3width/2} {-1*height} 0
+create vertex {fault3xpos - fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+surface {Id("surface")}  name "FZ3"
+merge all
+delete surface {Id("surface")-2} Surface {Id("surface")-3} 
+surface {Id("surface")}  rename "EastBasement"
+surface {Id("surface")-1}  rename "WestBasement"
+curve  ( at 2278.68 -2200 0 ordinal 1 ordered )  size 15
+curve  ( at 5552.35 -1700 0 ordinal 1 ordered )  size 25
+mesh curve  ( at 2278.68 -2200 0 ordinal 1 at 5552.35 -1700 0 ordinal 1 ordered ) 
+surface WestBasement EastBasement size 30
+block 3 WestBasement
+block  ( at 7500 -1700 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -1700 0 ordinal 1 ordered )  name "WestBasement"
+block 4 EastBasement
+block  ( at 7500 -300 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -300 0 ordinal 1 ordered )  name "EastBasement"
+create sideset 1 curve 3
+nodeset 1 curve  ( at 7500 -2700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 1 ordered )  name "floor"
+nodeset  ( at 7500 -2700 0 ordinal 1 ordered )  name "floor"
+create sideset 2 curve 1
+nodeset 2 curve  ( at 7500 0 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 2 ordered )  name "surface"
+create sideset 3 curve 14
+nodeset 3 curve  ( at 15000 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 3 ordered )  name "BasementWest"
+nodeset  ( at 15000 -1700 0 ordinal 1 ordered )  name "BasementWest"
+create sideset 4 curve 6
+sideset  ( at 0 0 0 ordinal 4 ordered )  name "FormationWest"
+create sideset 5 curve 18
+nodeset 5 curve  ( at 2298.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 5 ordered )  name "MudWest"
+nodeset  ( at 2298.68 -2200 0 ordinal 1 ordered )  name "MudWest"
+create sideset 6 curve 17
+nodeset 6 curve  ( at 2288.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 6 ordered )  name "MudEast"
+nodeset  ( at 2288.68 -2200 0 ordinal 1 ordered )  name "MudEast"
+create sideset 7 curve 8
+sideset  ( at 0 0 0 ordinal 7 ordered )  name "FormationEast"
+create sideset 8 curve 15
+nodeset 8 curve  ( at 15000 -300 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 8 ordered )  name "BasementEast"
+nodeset  ( at 15000 -300 0 ordinal 1 ordered )  name "BasementEast"
+create sideset 9 curve 19
+nodeset 9 curve  ( at 2278.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 9 ordered )  name "Fault1"
+nodeset  ( at 2278.68 -2200 0 ordinal 1 ordered )  name "Fault1"
+create sideset 10 curve 26
+nodeset 10 curve  ( at 5552.35 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 10 ordered )  name "Fault2"
+nodeset  ( at 5552.35 -1700 0 ordinal 1 ordered )  name "Fault2"
+create sideset 11 curve 33
+sideset  ( at 0 0 0 ordinal 11 ordered )  name "Fault3"
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+create vertex {fault1xpos} {-1*height} 0
+create vertex {fault1xpos + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos + fault1width/2} {-1*height} 0
+create vertex {fault1xpos + fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos - fault1width/2} {-1*height} 0
+create vertex {fault1xpos - fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ1"
+create vertex {fault2xpos} {-1*height} 0
+create vertex {fault2xpos + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos + fault2width/2} {-1*height} 0
+create vertex {fault2xpos + fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos - fault2width/2} {-1*height} 0
+create vertex {fault2xpos - fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ2"
+merge all
+create vertex {fault3xpos} {-1*height} 0
+create vertex {fault3xpos + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos + fault3width/2} {-1*height} 0
+create vertex {fault3xpos + fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos - fault3width/2} {-1*height} 0
+create vertex {fault3xpos - fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+surface {Id("surface")}  name "FZ3"
+merge all
+delete surface {Id("surface")-2} Surface {Id("surface")-3} 
+surface {Id("surface")}  rename "EastBasement"
+surface {Id("surface")-1}  rename "WestBasement"
+curve  ( at 2278.68 -2200 0 ordinal 1 ordered )  size 15
+curve  ( at 5552.35 -1700 0 ordinal 1 ordered )  size 25
+curve  ( at 10238.7 -2200 0 ordinal 1 ordered )  size 75
+mesh curve  ( at 2278.68 -2200 0 ordinal 1 at 5552.35 -1700 0 ordinal 1 at 10238.7 -2200 0 ordinal 1 ordered ) 
+surface WestBasement EastBasement size 30
+block 3 WestBasement
+block  ( at 7500 -1700 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -1700 0 ordinal 1 ordered )  name "WestBasement"
+block 4 EastBasement
+block  ( at 7500 -300 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -300 0 ordinal 1 ordered )  name "EastBasement"
+create sideset 1 curve 3
+nodeset 1 curve  ( at 7500 -2700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 1 ordered )  name "floor"
+nodeset  ( at 7500 -2700 0 ordinal 1 ordered )  name "floor"
+create sideset 2 curve 1
+nodeset 2 curve  ( at 7500 0 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 2 ordered )  name "surface"
+create sideset 3 curve 14
+nodeset 3 curve  ( at 15000 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 3 ordered )  name "BasementWest"
+nodeset  ( at 15000 -1700 0 ordinal 1 ordered )  name "BasementWest"
+create sideset 4 curve 6
+sideset  ( at 0 0 0 ordinal 4 ordered )  name "FormationWest"
+create sideset 5 curve 18
+nodeset 5 curve  ( at 2298.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 5 ordered )  name "MudWest"
+nodeset  ( at 2298.68 -2200 0 ordinal 1 ordered )  name "MudWest"
+create sideset 6 curve 17
+nodeset 6 curve  ( at 2288.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 6 ordered )  name "MudEast"
+nodeset  ( at 2288.68 -2200 0 ordinal 1 ordered )  name "MudEast"
+create sideset 7 curve 8
+sideset  ( at 0 0 0 ordinal 7 ordered )  name "FormationEast"
+create sideset 8 curve 15
+nodeset 8 curve  ( at 15000 -300 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 8 ordered )  name "BasementEast"
+nodeset  ( at 15000 -300 0 ordinal 1 ordered )  name "BasementEast"
+create sideset 9 curve 19
+nodeset 9 curve  ( at 2278.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 9 ordered )  name "Fault1"
+nodeset  ( at 2278.68 -2200 0 ordinal 1 ordered )  name "Fault1"
+create sideset 10 curve 26
+nodeset 10 curve  ( at 5552.35 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 10 ordered )  name "Fault2"
+nodeset  ( at 5552.35 -1700 0 ordinal 1 ordered )  name "Fault2"
+create sideset 11 curve 33
+nodeset 11 curve  ( at 10238.7 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 11 ordered )  name "Fault3"
+nodeset  ( at 10238.7 -2200 0 ordinal 1 ordered )  name "Fault3"
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+create vertex {fault1xpos} {-1*height} 0
+create vertex {fault1xpos + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos + fault1width/2} {-1*height} 0
+create vertex {fault1xpos + fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos - fault1width/2} {-1*height} 0
+create vertex {fault1xpos - fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ1"
+create vertex {fault2xpos} {-1*height} 0
+create vertex {fault2xpos + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos + fault2width/2} {-1*height} 0
+create vertex {fault2xpos + fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos - fault2width/2} {-1*height} 0
+create vertex {fault2xpos - fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ2"
+merge all
+create vertex {fault3xpos} {-1*height} 0
+create vertex {fault3xpos + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos + fault3width/2} {-1*height} 0
+create vertex {fault3xpos + fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos - fault3width/2} {-1*height} 0
+create vertex {fault3xpos - fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ3"
+merge all
+delete surface {Id("surface")-2} Surface {Id("surface")-3} 
+surface {Id("surface")}  rename "EastBasement"
+surface {Id("surface")-1}  rename "WestBasement"
+curve  ( at 2278.68 -2200 0 ordinal 1 ordered )  size 15
+curve  ( at 5552.35 -1700 0 ordinal 1 ordered )  size 25
+curve  ( at 10238.7 -2200 0 ordinal 1 ordered )  size 75
+mesh curve  ( at 2278.68 -2200 0 ordinal 1 at 5552.35 -1700 0 ordinal 1 at 10238.7 -2200 0 ordinal 1 ordered ) 
+surface WestBasement EastBasement size 30
+block 3 WestBasement
+block  ( at 7500 -1700 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -1700 0 ordinal 1 ordered )  name "WestBasement"
+block 4 EastBasement
+block  ( at 7500 -300 0 ordinal 1 ordered )  element type QUAD
+block  ( at 7500 -300 0 ordinal 1 ordered )  name "EastBasement"
+create sideset 1 curve 3
+nodeset 1 curve  ( at 7500 -2700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 1 ordered )  name "floor"
+nodeset  ( at 7500 -2700 0 ordinal 1 ordered )  name "floor"
+create sideset 2 curve 1
+nodeset 2 curve  ( at 7500 0 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 2 ordered )  name "surface"
+create sideset 3 curve 14
+nodeset 3 curve  ( at 15000 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 3 ordered )  name "BasementWest"
+nodeset  ( at 15000 -1700 0 ordinal 1 ordered )  name "BasementWest"
+create sideset 4 curve 6
+sideset  ( at 0 0 0 ordinal 4 ordered )  name "FormationWest"
+create sideset 5 curve 18
+nodeset 5 curve  ( at 2298.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 5 ordered )  name "MudWest"
+nodeset  ( at 2298.68 -2200 0 ordinal 1 ordered )  name "MudWest"
+create sideset 6 curve 17
+nodeset 6 curve  ( at 2288.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 6 ordered )  name "MudEast"
+nodeset  ( at 2288.68 -2200 0 ordinal 1 ordered )  name "MudEast"
+create sideset 7 curve 8
+sideset  ( at 0 0 0 ordinal 7 ordered )  name "FormationEast"
+create sideset 8 curve 15
+nodeset 8 curve  ( at 15000 -300 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 8 ordered )  name "BasementEast"
+nodeset  ( at 15000 -300 0 ordinal 1 ordered )  name "BasementEast"
+create sideset 9 curve 19
+nodeset 9 curve  ( at 2278.68 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 9 ordered )  name "Fault1"
+nodeset  ( at 2278.68 -2200 0 ordinal 1 ordered )  name "Fault1"
+create sideset 10 curve 26
+nodeset 10 curve  ( at 5552.35 -1700 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 10 ordered )  name "Fault2"
+nodeset  ( at 5552.35 -1700 0 ordinal 1 ordered )  name "Fault2"
+create sideset 11 curve 33
+nodeset 11 curve  ( at 10238.7 -2200 0 ordinal 1 ordered ) 
+sideset  ( at 0 0 0 ordinal 11 ordered )  name "Fault3"
+nodeset  ( at 10238.7 -2200 0 ordinal 1 ordered )  name "Fault3"
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+create vertex {fault1xpos} {-1*height} 0
+create vertex {fault1xpos + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos + fault1width/2} {-1*height} 0
+create vertex {fault1xpos + fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos - fault1width/2} {-1*height} 0
+create vertex {fault1xpos - fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ1"
+create vertex {fault2xpos} {-1*height} 0
+create vertex {fault2xpos + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos + fault2width/2} {-1*height} 0
+create vertex {fault2xpos + fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos - fault2width/2} {-1*height} 0
+create vertex {fault2xpos - fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ2"
+merge all
+create vertex {fault3xpos} {-1*height} 0
+create vertex {fault3xpos + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos + fault3width/2} {-1*height} 0
+create vertex {fault3xpos + fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos - fault3width/2} {-1*height} 0
+create vertex {fault3xpos - fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ3"
+merge all
+#subtract surface FZ1 from surface basement imprint keep
+#subtract surface FZ3 from surface {Id("surface")} imprint keep
+#subtract surface FZ2 from surface {Id("surface")} imprint keep
+#delete surface {Id("surface")-2} {Id("surface")-3}
+#surface {Id("surface")} rename "EastBasement"
+#surface {Id("surface")-1} rename "WestBasement"
+#curve 19 size 15
+#curve 26 size 25
+#curve 33 size 75
+#mesh curve 19 26 33
+#surface mudrock size 25
+#surface formation size 10
+#surface WestBasement EastBasement size 30
+#surface FZ1 size 5
+#surface FZ2 size 7.5
+#surface FZ3 size 10
+#block 1 surface mudrock
+#block 1 element type quad
+#block 1 name "mudrock"
+#block 2 surface formation
+#block 2 element type quad
+#block 2 name "formation"
+#block 3 surface WestBasement
+#block 3 element type quad
+#block 3 name "WestBasement"
+#block 4 surface EastBasement
+#block 4 element type quad
+#block 4 name "EastBasement"
+#block 5 surface FZ1
+#block 5 element type quad
+#block 5 name "FZ1"
+#block 6 surface FZ2
+#block 6 element type quad
+#block 6 name "FZ2"
+#block 7 surface FZ3
+#block 7 element type quad
+#block 7 name "FZ3"
+#mesh surface FZ1 FZ2 FZ3
+#mesh surface mudrock formation WestBasement EastBasement
+#create sideset 1 curve 3
+#nodeset 1 curve 3
+#sideset 1 name "floor"
+#nodeset 1 name "floor"
+#create sideset 2 curve 1
+#nodeset 2 curve 1
+#sideset 2 name "surface"
+#nodeset 3 name "BasementWest"
+#create sideset 3 curve 14
+#nodeset 3 curve 14
+#sideset 3 name "BasementWest"
+#nodeset 3 name "BasementWest"
+#create sideset 4 curve 6
+#nodeset 4 curve 6
+#sideset 4 name "FormationWest"
+#nodeset 4 name "FormationWest"
+#create sideset 5 curve 18
+#nodeset 5 curve 18
+#sideset 5 name "MudWest"
+#nodeset 5 name "MudWest"
+#create sideset 6 curve 17
+#nodeset 6 curve 17
+#sideset 6 name "MudEast"
+#nodeset 6 name "MudEast"
+#create sideset 7 curve 8
+#nodeset 7 curve 8
+#sideset 7 name "FormationEast"
+#nodeset 7 name "FormationEast"
+#create sideset 8 curve 15
+#nodeset 8 curve 15
+#sideset 8 name "BasementEast"
+#nodeset 8 name "BasementEast"
+#create sideset 9 curve 19
+#nodeset 9 curve 19
+#sideset 9 name "Fault1"
+#nodeset 9 name "Fault1"
+#create sideset 10 curve 26
+#nodeset 10 curve 26
+#sideset 10 name "Fault2"
+#nodeset 10 name "Fault2"
+#create sideset 11 curve 33
+#nodeset 11 curve 33
+#sideset 11 name "Fault3"
+#nodeset 11 name "Fault3"
+#export mesh "./Segall2D.exo" dimension 2 overwrite
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+create vertex {fault1xpos} {-1*height} 0
+create vertex {fault1xpos + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos + fault1width/2} {-1*height} 0
+create vertex {fault1xpos + fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create vertex {fault1xpos - fault1width/2} {-1*height} 0
+create vertex {fault1xpos - fault1width/2 + fault1height/tan(fault1angle)} {fault1height + height*-1} 0
+create curve {Id("vertex")-1} Curve {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ1"
+create vertex {fault2xpos} {-1*height} 0
+create vertex {fault2xpos + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos + fault2width/2} {-1*height} 0
+create vertex {fault2xpos + fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault2xpos - fault2width/2} {-1*height} 0
+create vertex {fault2xpos - fault2width/2 + fault2height/tan(fault2angle)} {fault2height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ2"
+merge all
+create vertex {fault3xpos} {-1*height} 0
+create vertex {fault3xpos + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos + fault3width/2} {-1*height} 0
+create vertex {fault3xpos + fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create vertex {fault3xpos - fault3width/2} {-1*height} 0
+create vertex {fault3xpos - fault3width/2 + fault3height/tan(fault3angle)} {fault3height + height*-1} 0
+create curve {Id("vertex")-1} {Id("vertex")}  on basement
+create curve vertex {Id("vertex")} Vertex {Id("vertex")-4} 
+create curve vertex {Id("vertex")-4} Vertex {Id("vertex")-2} 
+create curve vertex {Id("vertex")-1} Vertex {Id("vertex")-5} 
+create curve vertex {Id("vertex")-5} Vertex {Id("vertex")-3} 
+surface {Id("surface")}  name "FZ3"
+merge all
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y -650 z 0
+merge all
+surface  ( at 7500 -650 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1700 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 -300 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 -650 0 ordinal 1 ordered ) 
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+#surface 2 move x {length/2} y -650 z 0
+merge all
+surface  ( at 0 0 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 -1350 0 ordinal 1 ordered )  name "basement"
+delete body  ( at 0 0 0 ordinal 1 ordered ) 
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/-2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+merge all
+surface  ( at 7500 1350 0 ordinal 1 ordered )  name "formation"
+delete body  ( at 7500 1350 0 ordinal 1 ordered ) 
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+create surface rectangle width {length} height {pay}
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+merge all
+surface  ( at 7500 1350 0 ordinal 1 ordered )  name "formation"
+surface  ( at 7500 650 0 ordinal 1 ordered )  name "basement"
+surface  ( at 7500 2050 0 ordinal 1 ordered )  name "mudrock"
+delete body  ( at 7500 1350 0 ordinal 2 ordered ) 
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 60*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+create vertex {fault_xpos - fault_width/2} 0 0
+create vertex {fault_xpos + fault_width/2} 0 0
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 60*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+create vertex {fault_xpos - fault_width/2} 0 0
+create vertex {fault_xpos + fault_width/2} 0 0
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 60*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+create vertex {fault_xpos - fault_width/2} 0 0
+create vertex {fault_xpos + fault_width/2} 0 0
+split surface  ( at 500 500 0 ordinal 1 ordered )  across vertex {Id("vertex")} Vertex {Id("vertex")-1}  onto curve  ( at 500 1000 0 ordinal 1 ordered ) 
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 10*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} 0 0
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 10*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+split surface  ( at 500 500 0 ordinal 1 ordered )  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 90*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+split surface  ( at 500 500 0 ordinal 1 ordered )  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+split surface  ( at 500 500 0 ordinal 1 ordered )  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+#split surface 1 with surface 2
+#merge all
+#surface 2 name "formation"
+#surface 4 name "basement"
+#surface 5 name "mudrock"
+#delete body 2
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+#merge all
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Create quad mesh at 4 km resolution.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Make sure undo is off to prevent errors in stitching volumes.
+undo off
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 150.0 km x 100.0 km
+# -50.0 km <= x <= 50.0 km
+# -75.0 km <= y <= 75.0 km
+${blockWidth=100*km}
+${blockLength=150*km}
+${blockHeight=10*km}
+${faultLength=150.0*km}
+brick x {blockWidth} y {blockLength} z {blockHeight}
+${idV=Id("volume")}
+# surface 1 name "surf_front"
+surface ( at 0 0 5000 ordinal 1 ordered ) name "surf_front"
+# surface 2 name "surf_back"
+surface ( at 0 0 -5000 ordinal 1 ordered ) name "surf_back"
+create midsurface volume {idV}  surf_front surf_back
+${idS=Id("surface")}
+delete volume {idV} 
+# ----------------------------------------------------------------------
+# Create interface surfaces
+# ----------------------------------------------------------------------
+# Create fault (yz plane) at x = 0.0
+split surface {idS}  across location position 0 {-blockLength/2.0} 0 location position 0 {blockLength/2.0} 0
+# curve 17 name "fault_surface"
+curve ( at 0 0 0 ordinal 1 ordered ) name "fault_surface"
+# ----------------------------------------------------------------------
+# Name surfaces
+# ----------------------------------------------------------------------
+# surface 8 name "surface_xpos"
+surface ( at 25000 0 0 ordinal 1 ordered ) name "surface_xpos"
+# surface 9 name "surface_xneg"
+surface ( at -25000 0 0 ordinal 1 ordered ) name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name curves
+# ----------------------------------------------------------------------
+# curve 19 name "edge_ypos_xpos"
+curve ( at 25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xpos"
+# curve 20 name "edge_ypos_xneg"
+curve ( at -25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xneg"
+# curve 18 name "edge_yneg_xpos"
+curve ( at 25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xpos"
+# curve 21 name "edge_yneg_xneg"
+curve ( at -25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xneg"
+# curve 14 name "edge_xpos"
+curve ( at 50000 0 0 ordinal 1 ordered ) name "edge_xpos"
+# curve 16 name "edge_xneg"
+curve ( at -50000 0 0 ordinal 1 ordered ) name "edge_xneg"
+# ----------------------------------------------------------------------
+# Name vertices
+# ----------------------------------------------------------------------
+# vertex 14 name "vertex_fault_ypos"
+vertex ( at 0 75000 0 ordinal 1 ordered ) name "vertex_fault_ypos"
+# vertex 13 name "vertex_fault_yneg"
+vertex ( at 0 -75000 0 ordinal 1 ordered ) name "vertex_fault_yneg"
+# vertex 11 name "vertex_ypos_xpos"
+vertex ( at 50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xpos"
+# vertex 12 name "vertex_ypos_xneg"
+vertex ( at -50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xneg"
+# vertex 9 name "vertex_yneg_xpos"
+vertex ( at 50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xpos"
+# vertex 10 name "vertex_yneg_xneg"
+vertex ( at -50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xneg"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve fault_surface size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start fault_surface factor {bias_factor}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at -25000 0 0 ordinal 1 ordered )  name "elastic_xneg"
+block 2 surface_xpos
+block  ( at 25000 0 0 ordinal 1 ordered )  name "elastic_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for fault
+# ----------------------------------------------------------------------
+group "fault" add node in fault_surface
+nodeset 10 fault
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "fault"
+# ----------------------------------------------------------------------
+# Create nodeset for +x face
+# ----------------------------------------------------------------------
+group "face_xpos" add node in edge_xpos
+nodeset 21 face_xpos
+nodeset  ( at 50000 0 0 ordinal 1 ordered )  name "face_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x face
+# ----------------------------------------------------------------------
+group "face_xneg" add node in edge_xneg
+nodeset 22 face_xneg
+nodeset  ( at -50000 0 0 ordinal 1 ordered )  name "face_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y face
+# ----------------------------------------------------------------------
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 23 face_ypos
+nodeset  ( at 0 75000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y face
+# ----------------------------------------------------------------------
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 24 face_yneg
+nodeset  ( at 0 -75000 0 ordinal 1 ordered )  name "face_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_upper"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_top_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_lower"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_base_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Create quad mesh at 4 km resolution.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Make sure undo is off to prevent errors in stitching volumes.
+undo off
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 150.0 km x 100.0 km
+# -50.0 km <= x <= 50.0 km
+# -75.0 km <= y <= 75.0 km
+${blockWidth=100*km}
+${blockLength=150*km}
+${blockHeight=10*km}
+${faultLength=150.0*km}
+brick x {blockWidth} y {blockLength} z {blockHeight}
+${idV=Id("volume")}
+# surface 1 name "surf_front"
+surface ( at 0 0 5000 ordinal 1 ordered ) name "surf_front"
+# surface 2 name "surf_back"
+surface ( at 0 0 -5000 ordinal 1 ordered ) name "surf_back"
+create midsurface volume {idV}  surf_front surf_back
+${idS=Id("surface")}
+delete volume {idV} 
+# ----------------------------------------------------------------------
+# Create interface surfaces
+# ----------------------------------------------------------------------
+# Create fault (yz plane) at x = 0.0
+split surface {idS}  across location position 0 {-blockLength/2.0} 0 location position 0 {blockLength/2.0} 0
+# curve 17 name "fault_surface"
+curve ( at 0 0 0 ordinal 1 ordered ) name "fault_surface"
+# ----------------------------------------------------------------------
+# Name surfaces
+# ----------------------------------------------------------------------
+# surface 8 name "surface_xpos"
+surface ( at 25000 0 0 ordinal 1 ordered ) name "surface_xpos"
+# surface 9 name "surface_xneg"
+surface ( at -25000 0 0 ordinal 1 ordered ) name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name curves
+# ----------------------------------------------------------------------
+# curve 19 name "edge_ypos_xpos"
+curve ( at 25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xpos"
+# curve 20 name "edge_ypos_xneg"
+curve ( at -25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xneg"
+# curve 18 name "edge_yneg_xpos"
+curve ( at 25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xpos"
+# curve 21 name "edge_yneg_xneg"
+curve ( at -25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xneg"
+# curve 14 name "edge_xpos"
+curve ( at 50000 0 0 ordinal 1 ordered ) name "edge_xpos"
+# curve 16 name "edge_xneg"
+curve ( at -50000 0 0 ordinal 1 ordered ) name "edge_xneg"
+# ----------------------------------------------------------------------
+# Name vertices
+# ----------------------------------------------------------------------
+# vertex 14 name "vertex_fault_ypos"
+vertex ( at 0 75000 0 ordinal 1 ordered ) name "vertex_fault_ypos"
+# vertex 13 name "vertex_fault_yneg"
+vertex ( at 0 -75000 0 ordinal 1 ordered ) name "vertex_fault_yneg"
+# vertex 11 name "vertex_ypos_xpos"
+vertex ( at 50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xpos"
+# vertex 12 name "vertex_ypos_xneg"
+vertex ( at -50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xneg"
+# vertex 9 name "vertex_yneg_xpos"
+vertex ( at 50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xpos"
+# vertex 10 name "vertex_yneg_xneg"
+vertex ( at -50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xneg"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve fault_surface size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start fault_surface factor {bias_factor}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at -25000 0 0 ordinal 1 ordered )  name "elastic_xneg"
+block 2 surface_xpos
+block  ( at 25000 0 0 ordinal 1 ordered )  name "elastic_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for fault
+# ----------------------------------------------------------------------
+group "fault" add node in fault_surface
+nodeset 10 fault
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "fault"
+# ----------------------------------------------------------------------
+# Create nodeset for +x face
+# ----------------------------------------------------------------------
+group "face_xpos" add node in edge_xpos
+nodeset 21 face_xpos
+nodeset  ( at 50000 0 0 ordinal 1 ordered )  name "face_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x face
+# ----------------------------------------------------------------------
+group "face_xneg" add node in edge_xneg
+nodeset 22 face_xneg
+nodeset  ( at -50000 0 0 ordinal 1 ordered )  name "face_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y face
+# ----------------------------------------------------------------------
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 23 face_ypos
+nodeset  ( at 0 75000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y face
+# ----------------------------------------------------------------------
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 24 face_yneg
+nodeset  ( at 0 -75000 0 ordinal 1 ordered )  name "face_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_upper"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_top_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_lower"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_base_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_upper"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_top_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_lower"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_base_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_base_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_base_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_top_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_top_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "upper_formation"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "lower_formation"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+block 3 fault
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+block 3 fault
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+block 3 fault
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 fault
+block 2 surface_xpos
+block  ( at 677.836 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block 2 surface_xpos
+block  ( at 677.836 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block 2 surface_xpos
+block  ( at 677.836 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=40*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve edge_fault_xpos size {dx}
+curve edge_fault_xneg size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start edge_fault_xpos factor {bias_factor}
+surface all sizing function type bias start edge_fault_xneg factor {bias_factor}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=100*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve edge_fault_xpos size {dx}
+curve edge_fault_xneg size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start edge_fault_xpos factor {bias_factor}
+surface all sizing function type bias start edge_fault_xneg factor {bias_factor}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=10*m}
+surface all scheme pave
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve edge_fault_xpos size {dx}
+curve edge_fault_xneg size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xneg
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos_xpos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg_xpos
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start edge_fault_xpos factor {bias_factor}
+surface all sizing function type bias start edge_fault_xneg factor {bias_factor}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface surface_xpos size 25
+surface surface_xneg size 25
+surface surface_fault size 5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 311.811 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 500 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 688.189 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle = 75*deg}
+#{fault_width = 20*m}
+#{fault_height = 1000*m}
+#{fault_xpos = 500*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 1000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 510.353 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 688.189 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 822.164 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 633.975 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 489.647 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 366.025 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 311.811 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 177.836 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 1000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 1000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 355.673 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 376.378 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 623.622 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 644.327 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 25
+surface surface_xneg size 25
+surface surface_fault size 5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all

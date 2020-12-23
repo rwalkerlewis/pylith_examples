@@ -1,0 +1,762 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 12/23/2020 03:51:38 PM
+## Command Options:
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# Create quad mesh at 4 km resolution.
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# CUBIT journal file with geometry for 2-D strike-slip example.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Make sure undo is off to prevent errors in stitching volumes.
+undo off
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 150.0 km x 100.0 km
+# -50.0 km <= x <= 50.0 km
+# -75.0 km <= y <= 75.0 km
+${blockWidth=100*km}
+${blockLength=150*km}
+${blockHeight=10*km}
+${faultLength=150.0*km}
+brick x {blockWidth} y {blockLength} z {blockHeight}
+${idV=Id("volume")}
+# surface 1 name "surf_front"
+surface ( at 0 0 5000 ordinal 1 ordered ) name "surf_front"
+# surface 2 name "surf_back"
+surface ( at 0 0 -5000 ordinal 1 ordered ) name "surf_back"
+create midsurface volume {idV}  surf_front surf_back
+${idS=Id("surface")}
+delete volume {idV} 
+# ----------------------------------------------------------------------
+# Create interface surfaces
+# ----------------------------------------------------------------------
+# Create fault (yz plane) at x = 0.0
+split surface {idS}  across location position 0 {-blockLength/2.0} 0 location position 0 {blockLength/2.0} 0
+# curve 17 name "fault_surface"
+curve ( at 0 0 0 ordinal 1 ordered ) name "fault_surface"
+# ----------------------------------------------------------------------
+# Name surfaces
+# ----------------------------------------------------------------------
+# surface 8 name "surface_xpos"
+surface ( at 25000 0 0 ordinal 1 ordered ) name "surface_xpos"
+# surface 9 name "surface_xneg"
+surface ( at -25000 0 0 ordinal 1 ordered ) name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name curves
+# ----------------------------------------------------------------------
+# curve 19 name "edge_ypos_xpos"
+curve ( at 25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xpos"
+# curve 20 name "edge_ypos_xneg"
+curve ( at -25000 75000 0 ordinal 1 ordered ) name "edge_ypos_xneg"
+# curve 18 name "edge_yneg_xpos"
+curve ( at 25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xpos"
+# curve 21 name "edge_yneg_xneg"
+curve ( at -25000 -75000 0 ordinal 1 ordered ) name "edge_yneg_xneg"
+# curve 14 name "edge_xpos"
+curve ( at 50000 0 0 ordinal 1 ordered ) name "edge_xpos"
+# curve 16 name "edge_xneg"
+curve ( at -50000 0 0 ordinal 1 ordered ) name "edge_xneg"
+# ----------------------------------------------------------------------
+# Name vertices
+# ----------------------------------------------------------------------
+# vertex 14 name "vertex_fault_ypos"
+vertex ( at 0 75000 0 ordinal 1 ordered ) name "vertex_fault_ypos"
+# vertex 13 name "vertex_fault_yneg"
+vertex ( at 0 -75000 0 ordinal 1 ordered ) name "vertex_fault_yneg"
+# vertex 11 name "vertex_ypos_xpos"
+vertex ( at 50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xpos"
+# vertex 12 name "vertex_ypos_xneg"
+vertex ( at -50000 75000 0 ordinal 1 ordered ) name "vertex_ypos_xneg"
+# vertex 9 name "vertex_yneg_xpos"
+vertex ( at 50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xpos"
+# vertex 10 name "vertex_yneg_xneg"
+vertex ( at -50000 -75000 0 ordinal 1 ordered ) name "vertex_yneg_xneg"
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# The "pave" scheme is an unstructured 2-D quad meshing scheme.
+# ----------------------------------------------------------------------
+${dx=4.0*km}
+surface all scheme pave
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# Set vertex spacing with increasing spacing away from fault
+# ----------------------------------------------------------------------
+${bias_factor=1.05}
+# Function for computing discretization size at end of curve with bias
+${fun_dx='dxStart*bias_factor**ceil( ln(1-curveL/dxStart*(1-bias_factor))/ln(bias_factor))'}
+# ----------------------------------------------------------------------
+# Compute sizes at curve endpoints
+# ----------------------------------------------------------------------
+# dxA - size at vertex_ypos_xpos, vertex_ypos_xneg, vertex_yneg_xpos, vertex_yneg_xneg
+${dxStart=dx}{curveL=Length(Id("edge_ypos_xneg"))}{execute("dxA="//fun_dx)}
+# ----------------------------------------------------------------------
+# Reset sizes
+# ----------------------------------------------------------------------
+curve all scheme default
+surface all sizing function none
+# Set size on faults
+curve fault_surface size {dx}
+# Fault to edge
+curve edge_ypos_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_ypos_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_ypos
+curve edge_yneg_xneg scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+curve edge_yneg_xpos scheme bias fine size {dx} factor {bias_factor} start vertex_fault_yneg
+# Mesh edges
+curve edge_xneg size {dxA}
+curve edge_xpos size {dxA}
+# For CUBIT 15.4
+set trimesher surface gradation {bias_factor}
+# For earlier versions of CUBIT
+surface all sizing function type bias start fault_surface factor {bias_factor}
+# End of file
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 1.1 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at -25000 0 0 ordinal 1 ordered )  name "elastic_xneg"
+block 2 surface_xpos
+block  ( at 25000 0 0 ordinal 1 ordered )  name "elastic_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for fault
+# ----------------------------------------------------------------------
+group "fault" add node in fault_surface
+nodeset 10 fault
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "fault"
+# ----------------------------------------------------------------------
+# Create nodeset for +x face
+# ----------------------------------------------------------------------
+group "face_xpos" add node in edge_xpos
+nodeset 21 face_xpos
+nodeset  ( at 50000 0 0 ordinal 1 ordered )  name "face_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x face
+# ----------------------------------------------------------------------
+group "face_xneg" add node in edge_xneg
+nodeset 22 face_xneg
+nodeset  ( at -50000 0 0 ordinal 1 ordered )  name "face_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y face
+# ----------------------------------------------------------------------
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 23 face_ypos
+nodeset  ( at 0 75000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y face
+# ----------------------------------------------------------------------
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 24 face_yneg
+nodeset  ( at 0 -75000 0 ordinal 1 ordered )  name "face_yneg"
+# End of file
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle =45*deg}
+#{fault_width = 20*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+#{length = length + fault_offset}
+#{fault_xpos = length/2}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 2000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 1014.14 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 1257.07 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 1757.07 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 1500 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 985.858 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 500 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 742.929 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 242.929 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 2000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 2000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 485.858 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 514.142 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 1485.86 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 1514.14 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 25
+surface surface_xneg size 25
+surface surface_fault size 5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 2 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 742.929 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 1000 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 1257.07 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+group "fault_xneg" add node in edge_fault_xneg
+nodeset 1 fault_xneg
+nodeset  ( at 985.858 500 0 ordinal 1 ordered )  name "fault_xneg"
+group "fault_xpos" add node in edge_fault_xpos
+nodeset 2 fault_xpos
+nodeset  ( at 1014.14 500 0 ordinal 1 ordered )  name "fault_xpos"
+group "face_xneg" add node in edge_xneg
+nodeset 3 face_xneg
+nodeset  ( at 0 500 0 ordinal 1 ordered )  name "face_xneg"
+group "face_xpos" add node in edge_xpos
+nodeset 3 face_xpos
+nodeset  ( at 1000 500 0 ordinal 1 ordered )  name "face_xpos"
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_fault_width
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 4 face_yneg
+nodeset  ( at 1000 0 0 ordinal 1 ordered )  name "face_yneg"
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_fault_width
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 5 face_ypos
+nodeset  ( at 1000 1000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle =45*deg}
+#{fault_width = 20*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+#{length = length + fault_offset}
+#{fault_xpos = length/2}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 2000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 1014.14 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 1257.07 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 1757.07 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 1500 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 985.858 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 500 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 742.929 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 242.929 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 2000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 2000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 485.858 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 514.142 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 1485.86 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 1514.14 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 25
+surface surface_xneg size 25
+surface surface_fault size 5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 2 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 742.929 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 1000 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 1257.07 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+group "fault_xneg" add node in edge_fault_xneg
+nodeset 1 fault_xneg
+nodeset  ( at 985.858 500 0 ordinal 1 ordered )  name "fault_xneg"
+group "fault_xpos" add node in edge_fault_xpos
+nodeset 2 fault_xpos
+nodeset  ( at 1014.14 500 0 ordinal 1 ordered )  name "fault_xpos"
+group "face_xneg" add node in edge_xneg
+nodeset 3 face_xneg
+nodeset  ( at 0 500 0 ordinal 1 ordered )  name "face_xneg"
+group "face_xpos" add node in edge_xpos
+nodeset 4 face_xpos
+nodeset  ( at 2000 500 0 ordinal 1 ordered )  name "face_xpos"
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_fault_width
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 5 face_yneg
+nodeset  ( at 1000 0 0 ordinal 1 ordered )  name "face_yneg"
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_fault_width
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 6 face_ypos
+nodeset  ( at 1000 1000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 1.0*km}
+#{height = 1.0*km}
+#{fault_angle =45*deg}
+#{fault_width = 20*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+#{length = length + fault_offset}
+#{fault_xpos = length/2}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 500 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 2000 500 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 1014.14 500 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 1257.07 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 1757.07 1000 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 1500 1000 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 985.858 500 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 500 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 742.929 1000 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 242.929 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 2000 1000 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 1000 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 2000 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 485.858 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 514.142 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 1485.86 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 1514.14 1000 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 25
+surface surface_xneg size 25
+surface surface_fault size 5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 2 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 742.929 500 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 1000 500 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 1257.07 500 0 ordinal 1 ordered )  name "poroelastic_xpos"
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+group "fault_xneg" add node in edge_fault_xneg
+nodeset 1 fault_xneg
+nodeset  ( at 985.858 500 0 ordinal 1 ordered )  name "fault_xneg"
+group "fault_xpos" add node in edge_fault_xpos
+nodeset 2 fault_xpos
+nodeset  ( at 1014.14 500 0 ordinal 1 ordered )  name "fault_xpos"
+group "face_xneg" add node in edge_xneg
+nodeset 3 face_xneg
+nodeset  ( at 0 500 0 ordinal 1 ordered )  name "face_xneg"
+group "face_xpos" add node in edge_xpos
+nodeset 4 face_xpos
+nodeset  ( at 2000 500 0 ordinal 1 ordered )  name "face_xpos"
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_fault_width
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 5 face_yneg
+nodeset  ( at 1000 0 0 ordinal 1 ordered )  name "face_yneg"
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_fault_width
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 6 face_ypos
+nodeset  ( at 1000 1000 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 100*m}
+#{height = 100*m}
+#{fault_angle =45*deg}
+#{fault_width = 0.5*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+#{length = length + fault_offset}
+#{fault_xpos = length/2}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 50 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 200 50 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 100.354 50 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 125.177 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 175.177 100 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 150 100 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 99.6464 50 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 50 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 74.8232 100 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 24.8232 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 200 100 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 100 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 200 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 49.6464 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 50.3536 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 149.646 100 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 150.354 100 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 25
+surface surface_xneg size 25
+surface surface_fault size 5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 2 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 74.8232 50 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 100 50 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 125.177 50 0 ordinal 1 ordered )  name "poroelastic_xpos"
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+group "fault_xneg" add node in edge_fault_xneg
+nodeset 1 fault_xneg
+nodeset  ( at 99.6464 50 0 ordinal 1 ordered )  name "fault_xneg"
+group "fault_xpos" add node in edge_fault_xpos
+nodeset 2 fault_xpos
+nodeset  ( at 100.354 50 0 ordinal 1 ordered )  name "fault_xpos"
+group "face_xneg" add node in edge_xneg
+nodeset 3 face_xneg
+nodeset  ( at 0 50 0 ordinal 1 ordered )  name "face_xneg"
+group "face_xpos" add node in edge_xpos
+nodeset 4 face_xpos
+nodeset  ( at 200 50 0 ordinal 1 ordered )  name "face_xpos"
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_fault_width
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 5 face_yneg
+nodeset  ( at 100 0 0 ordinal 1 ordered )  name "face_yneg"
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_fault_width
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 6 face_ypos
+nodeset  ( at 100 100 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
+${Units('si')}
+undo off
+reset
+#{length = 100*m}
+#{height = 100*m}
+#{fault_angle =45*deg}
+#{fault_width = 0.5*m}
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+#{length = length + fault_offset}
+#{fault_xpos = length/2}
+create surface rectangle width {length} height {height} zplane
+surface  ( at 0 0 0 ordinal 1 ordered )  move x {length/2} y {height/2} z 0
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+# Split surface with fault
+split surface {Id("surface")}  across pair vertex {Id("vertex")-3} Vertex {Id("vertex")-1} Vertex {Id("vertex")-2} Vertex {Id("vertex")} 
+merge all
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+surface {Id("surface")-2}  name "surface_xpos"
+surface {Id("surface")-1}  name "surface_fault"
+surface {Id("surface")}  name "surface_xneg"
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve  ( at 0 50 0 ordinal 1 ordered )  name "edge_xneg"
+curve  ( at 200 50 0 ordinal 1 ordered )  name "edge_xpos"
+curve  ( at 100.354 50 0 ordinal 1 ordered )  name "edge_fault_xpos"
+curve  ( at 125.177 0 0 ordinal 1 ordered )  name "edge_yneg_xpos"
+curve  ( at 175.177 100 0 ordinal 1 ordered )  name "edge_ypos_xpos"
+curve  ( at 150 100 0 ordinal 1 ordered )  name "edge_ypos_fault_width"
+curve  ( at 99.6464 50 0 ordinal 1 ordered )  name "edge_fault_xneg"
+curve  ( at 50 0 0 ordinal 1 ordered )  name "edge_yneg_fault_width"
+curve  ( at 74.8232 100 0 ordinal 1 ordered )  name "edge_ypos_xneg"
+curve  ( at 24.8232 0 0 ordinal 1 ordered )  name "edge_yneg_xneg"
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex  ( at 200 100 0 ordinal 1 ordered )  name "vertex_ypos_xpos"
+vertex  ( at 0 100 0 ordinal 1 ordered )  name "vertex_ypos_xneg"
+vertex  ( at 0 0 0 ordinal 1 ordered )  name "vertex_yneg_xneg"
+vertex  ( at 200 0 0 ordinal 1 ordered )  name "vertex_yneg_xpos"
+vertex  ( at 49.6464 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xneg"
+vertex  ( at 50.3536 0 0 ordinal 1 ordered )  name "vertex_fault_yneg_xpos"
+vertex  ( at 149.646 100 0 ordinal 1 ordered )  name "vertex_fault_ypos_xneg"
+vertex  ( at 150.354 100 0 ordinal 1 ordered )  name "vertex_fault_ypos_xpos"
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 5
+surface surface_xneg size 5
+surface surface_fault size 2.5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 2 cpu 10
+smooth surface all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface_xneg
+block  ( at 74.8232 50 0 ordinal 1 ordered )  name "poroelastic_xneg"
+block 2 surface_fault
+block  ( at 100 50 0 ordinal 1 ordered )  name "poroelastic_fault"
+block 3 surface_xpos
+block  ( at 125.177 50 0 ordinal 1 ordered )  name "poroelastic_xpos"
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+group "fault_xneg" add node in edge_fault_xneg
+nodeset 1 fault_xneg
+nodeset  ( at 99.6464 50 0 ordinal 1 ordered )  name "fault_xneg"
+group "fault_xpos" add node in edge_fault_xpos
+nodeset 2 fault_xpos
+nodeset  ( at 100.354 50 0 ordinal 1 ordered )  name "fault_xpos"
+group "face_xneg" add node in edge_xneg
+nodeset 3 face_xneg
+nodeset  ( at 0 50 0 ordinal 1 ordered )  name "face_xneg"
+group "face_xpos" add node in edge_xpos
+nodeset 4 face_xpos
+nodeset  ( at 200 50 0 ordinal 1 ordered )  name "face_xpos"
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_fault_width
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 5 face_yneg
+nodeset  ( at 100 0 0 ordinal 1 ordered )  name "face_yneg"
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_fault_width
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 6 face_ypos
+nodeset  ( at 100 100 0 ordinal 1 ordered )  name "face_ypos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# End of file
