@@ -1,0 +1,140 @@
+${Units('si')}
+undo off
+reset
+#{length = 100*m}
+#{height = 100*m}
+
+#{fault_angle =45*deg}
+#{fault_width = 0.1*m}
+
+
+#{fault_base_width = fault_width / sin(fault_angle)}
+#{fault_offset = height/tan(fault_angle)}
+#{length = length + fault_offset}
+#{fault_xpos = length/2}
+
+## Create surface, shift to positive space
+Create Surface rectangle width {length} height {height} ZPLANE
+
+surface 1 move x {length/2} y {height/2} z 0
+
+## Create Fault
+
+# Base Pair
+create vertex {fault_xpos - fault_base_width/2 - fault_offset/2} 0 0
+create vertex {fault_xpos + fault_base_width/2 - fault_offset/2} 0 0
+
+# Top Pair
+create vertex {fault_xpos - fault_base_width/2 + fault_offset/2} {height} 0
+create vertex {fault_xpos + fault_base_width/2 + fault_offset/2} {height} 0
+
+# Split surface with fault
+
+split surface {Id("surface")} across pair vertex {Id("vertex")-3} {Id("vertex")-1} {Id("vertex")-2} {Id("vertex")} 
+
+merge all
+
+# ----------------------------------------------------------------------
+# Name Surfaces
+# ----------------------------------------------------------------------
+
+surface {Id("surface")-2} name "surface_xpos"
+surface {Id("surface")-1} name "surface_fault"
+surface {Id("surface")} name "surface_xneg"
+
+# ----------------------------------------------------------------------
+# Name Curves
+# ----------------------------------------------------------------------
+curve 2 name "edge_xneg"
+curve 4 name "edge_xpos"
+curve 5 name "edge_fault_xpos"
+curve 6 name "edge_yneg_xpos"
+curve 7 name "edge_ypos_xpos"
+curve 8 name "edge_ypos_fault_width"
+curve 9 name "edge_fault_xneg"
+curve 10 name "edge_yneg_fault_width"
+curve 11 name "edge_ypos_xneg"
+curve 12 name "edge_yneg_xneg"
+
+# ----------------------------------------------------------------------
+# Name Verticies
+# ----------------------------------------------------------------------
+vertex 1 name "vertex_ypos_xpos"
+vertex 2 name "vertex_ypos_xneg"
+vertex 3 name "vertex_yneg_xneg"
+vertex 4 name "vertex_yneg_xpos"
+vertex 5 name "vertex_fault_yneg_xneg"
+vertex 6 name "vertex_fault_yneg_xpos"
+vertex 7 name "vertex_fault_ypos_xneg"
+vertex 8 name "vertex_fault_ypos_xpos"
+
+# ----------------------------------------------------------------------
+# Set discretization size and scheme
+# ----------------------------------------------------------------------
+surface all scheme pave
+surface surface_xpos size 5
+surface surface_xneg size 5
+surface surface_fault size 2.5
+
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+# preview mesh surface all
+mesh surface all
+
+# ----------------------------------------------------------------------
+# Smooth mesh to improve quality
+# ----------------------------------------------------------------------
+surface all smooth scheme condition number beta 2.0 cpu 10
+smooth surface all
+
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface surface_xneg
+block 1 name "poroelastic_xneg"
+
+block 2 surface surface_fault
+block 2 name "poroelastic_fault"
+
+block 3 surface surface_xpos
+block 3 name "poroelastic_xpos"
+
+# ----------------------------------------------------------------------
+# Setup boundary conditions.
+# ----------------------------------------------------------------------
+
+group "fault_xneg" add node in edge_fault_xneg
+nodeset 1 group fault_xneg
+nodeset 1 name "fault_xneg"
+
+group "fault_xpos" add node in edge_fault_xpos
+nodeset 2 group fault_xpos
+nodeset 2 name "fault_xpos"
+
+group "face_xneg" add node in edge_xneg
+nodeset 3 group face_xneg
+nodeset 3 name "face_xneg"
+
+group "face_xpos" add node in edge_xpos
+nodeset 4 group face_xpos
+nodeset 4 name "face_xpos"
+
+group "face_yneg" add node in edge_yneg_xneg
+group "face_yneg" add node in edge_yneg_fault_width
+group "face_yneg" add node in edge_yneg_xpos
+nodeset 5 group face_yneg
+nodeset 5 name "face_yneg"
+
+group "face_ypos" add node in edge_ypos_xneg
+group "face_ypos" add node in edge_ypos_fault_width
+group "face_ypos" add node in edge_ypos_xpos
+nodeset 6 group face_ypos
+nodeset 6 name "face_ypos"
+
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+
+# End of file
