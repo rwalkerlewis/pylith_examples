@@ -4,7 +4,7 @@ reset
 #{length = 100*m}
 #{height = 100*m}
 
-#{fault_angle = 45*deg}
+#{fault_angle = 50*deg}
 #{fault_width = 0.1*m}
 
 

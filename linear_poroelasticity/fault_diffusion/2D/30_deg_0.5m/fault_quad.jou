@@ -4,8 +4,8 @@ reset
 #{length = 100*m}
 #{height = 100*m}
 
-#{fault_angle = 45*deg}
-#{fault_width = 0.1*m}
+#{fault_angle = 30*deg}
+#{fault_width = 0.5*m}
 
 
 #{fault_base_width = fault_width / sin(fault_angle)}
