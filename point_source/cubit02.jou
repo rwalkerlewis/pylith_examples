@@ -1,0 +1,1101 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 03/02/2021 12:20:06 PM
+## Command Options:
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/cryer"
+create sphere radius 3
+reset
+create sphere radius 5
+volume 1 scheme auto
+list volume 1
+mesh volume 1
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+#playback 'geometry.jou'
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 10m in radius
+reset
+create sphere radius 10
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.5
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+reset
+create sphere radius 5
+reset
+create sphere radius 1.4 inner radius 1.25
+create sphere radius 1.25
+merge all
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+merge all
+webcut body all cylinder radius 0.85 axis z imprint
+merge all
+compress all
+# Mesh top of cylinder
+surface 9 scheme triprimitive
+surface 9 size auto factor 10
+mesh surface 9
+# Mesh cyliner
+volume 3 4 redistribute nodes off
+volume 3 4 scheme sweep sweep transform translate propagate bias
+volume 3 4 autosmooth target off
+volume 3 4 size auto factor 7
+# Outer layers
+curve 1 interval 1
+curve 1 scheme equal
+# Inner layers
+curve 6 interval 4
+curve 6 scheme equal
+mesh volume 3 4
+# Inner Side
+surface 14 size auto factor 10
+surface 14 scheme triprimitive
+mesh surface 14
+volume 2 redistribute nodes off
+volume 2 scheme sweep sweep transform translate propagate bias
+volume 2 autosmooth target off
+mesh volume 2
+# Outer Side
+surface 5 size auto factor 10
+surface 5 scheme auto
+mesh surface 5
+volume 1 redistribute nodes off
+volume 1 scheme sweep sweep transform translate propagate bias
+volume 1 autosmooth target off
+mesh volume 1
+# Make the rest of the sphere
+volume all copy reflect x
+volume all copy reflect z
+volume all copy reflect y
+merge all
+#Blocks
+block 1 add volume 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+surface 1 scheme triprimitive
+surface 1 size auto factor 10
+mesh surface 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+surface 1 scheme auto
+surface 1 size auto factor 10
+mesh surface 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+surface 1 scheme auto
+surface 1 size 0.5
+mesh surface 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+surface 1 scheme auto
+surface 1 size 1
+mesh surface 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+surface 1 scheme auto
+surface 1 size 1
+mesh surface 1
+volume 1 scheme auto
+volume 1 size 1
+mesh volume 1
+surface 1 scheme auto
+surface 1 size 1
+mesh surface 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme auto
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme auto
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme auto
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme map
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme auto
+#surface 1 size 1
+#mesh surface 1
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme tetrahedron
+#surface 1 size 1
+#mesh surface 1
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme sphere
+volume 1 size 1
+mesh volume 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme sphere
+volume 1 size 1
+mesh volume 1
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme sphere
+volume 1 size 0.5
+mesh volume 1
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme auto
+volume 1 size 0.5
+mesh volume 1
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+#surface 1 scheme 
+#surface 1 size 1
+#mesh surface 1
+volume 1 scheme auto
+volume 1 size auto
+mesh volume 1
+export mesh "mesh_hex.exo" dimension 3 overwrite
+delete mesh surface 1 propagate
+delete mesh surface 1 propagate
+delete mesh surface 1 propagate
+quality surface 1
+mesh surface 1
+mesh surface 1
+smooth surface 1
+delete mesh surface 1 propagate
+reset surface 1
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+compress all
+volume 1 scheme auto
+volume 1 size auto
+mesh volume 1
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 50
+volume 1 size 20
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 50
+volume 1 size 10
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 50
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# Sphere is 10m in radius
+reset
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+group "boundary_surface" add node in surface 1
+nodeset 1 boundary_surface
+nodeset 1 name "boundary_surface"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+group "boundary_surface_traction" add node in surface 1
+nodeset 1 boundary_surface_traction
+nodeset 1 name "boundary_surface_traction"
+group "boundary_surface_pressure" add node in surface 1
+nodeset 2 boundary_surface_pressure
+nodeset 2 name "boundary_surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+set large exodus file off
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+list nodeset 1
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX20
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.7
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.1
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.75
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX8
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.75
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.75
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type TETRA4
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.5
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type TETRA4
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+set geometry engine facet
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+reset
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+set geometry engine acis
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.5
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type TETRA4
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+volume 1 size 0.5
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX8
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+block all element type HEX8
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme auto
+mesh volume 1
+block 1 volume 1
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme map
+block 1 volume 1
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+mesh volume 1
+block 1 volume 1
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme map
+block 1 volume 1
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme map
+block 1 volume 1
+block all element type HEX8
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme map
+block 1 volume 1
+block all element type HEX8
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+#webcut body all xplane
+#webcut body all yplane
+#webcut body all zplane
+#delete volume 2 3 4 5 6 7 8
+#merge all
+volume 1 size 0.5
+mesh volume 1
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+#webcut body all xplane
+#webcut body all yplane
+#webcut body all zplane
+#delete volume 2 3 4 5 6 7 8
+#merge all
+volume 1 size 0.5
+mesh volume 1
+refine volume 1 numsplit 4 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+#webcut body all xplane
+#webcut body all yplane
+#webcut body all zplane
+#delete volume 2 3 4 5 6 7 8
+#merge all
+volume 1 size 0.5
+mesh volume 1
+refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 1
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 1
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+mesh volume 1
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme auto
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme auto
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme auto
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.5
+volume 1 scheme auto
+block 1 volume 1
+block all element type HEX8
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+mesh volume 1
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+volume 1 size 0.5
+volume 1 scheme auto
+block 1 volume 1
+mesh volume 1
+block all element type HEX8
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 10m in radius
+create sphere radius 10
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.5
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_pos" add node in surface 18
+nodeset 3 z_pos
+nodeset 3 name "z_pos"
+group "x_neg" add node in surface 21
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_pos" add node in surface 20
+nodeset 5 y_pos
+nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite

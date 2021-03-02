@@ -1,0 +1,56 @@
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+
+# Sphere is 10m in radius
+
+
+create sphere radius 10
+
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+
+
+volume 1 size 0.5
+volume 1 scheme tetprimitive 
+block 1 volume 1
+block all element type HEX8
+
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+
+group "surface_traction" add node in surface 19
+nodeset 1 group surface_traction
+nodeset 1 name "surface_traction"
+
+group "surface_pressure" add node in surface 19
+nodeset 2 group surface_pressure
+nodeset 2 name "surface_pressure"
+
+group "z_pos" add node in surface 18
+nodeset 3 group z_pos
+nodeset 3 name "z_pos"
+
+group "x_neg" add node in surface 21
+nodeset 4 group x_neg
+nodeset 4 name "x_neg"
+
+group "y_pos" add node in surface 20
+nodeset 5 group y_pos
+nodeset 5 name "y_pos"
+
+
+## Export 
+export mesh "mesh_hex.exo" dimension 3 overwrite
+
+

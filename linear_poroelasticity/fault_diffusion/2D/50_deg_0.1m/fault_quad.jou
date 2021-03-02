@@ -1,10 +1,10 @@
 ${Units('si')}
 undo off
 reset
-#{length = 100*m}
-#{height = 100*m}
+#{length = 50*m}
+#{height = 20*m}
 
-#{fault_angle = 50*deg}
+#{fault_angle =50*deg}
 #{fault_width = 0.1*m}
 
 
@@ -72,9 +72,9 @@ vertex 8 name "vertex_fault_ypos_xpos"
 # Set discretization size and scheme
 # ----------------------------------------------------------------------
 surface all scheme pave
-surface surface_xpos size 5
-surface surface_xneg size 5
-surface surface_fault size 2.5
+surface surface_xpos size 1
+surface surface_xneg size 1
+surface surface_fault size 0.5
 
 # ----------------------------------------------------------------------
 # Generate the mesh
@@ -138,3 +138,6 @@ nodeset 6 name "face_ypos"
 export mesh "mesh_quad.exo" dimension 2 overwrite
 
 # End of file
+
+
+

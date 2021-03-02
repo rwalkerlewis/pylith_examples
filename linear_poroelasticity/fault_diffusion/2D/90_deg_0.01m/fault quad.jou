@@ -4,8 +4,8 @@ reset
 #{length = 50*m}
 #{height = 20*m}
 
-#{fault_angle =45*deg}
-#{fault_width = 0.25*m}
+#{fault_angle =90*deg}
+#{fault_width = 0.01*m}
 
 
 #{fault_base_width = fault_width / sin(fault_angle)}
@@ -138,4 +138,5 @@ nodeset 6 name "face_ypos"
 export mesh "mesh_quad.exo" dimension 2 overwrite
 
 # End of file
+
 

@@ -2,12 +2,13 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.optimize as opt
 import h5py
 
 # ==============================================================================
 # Computational Values
-ITERATIONS = 2000
-EPS = 1e-5
+ITERATIONS = 300
+EPS = 1e-20
 
 # ==============================================================================
 # Physical Values
@@ -22,7 +23,7 @@ alpha = 0.6
 phi = 0.1
 k = 1.5
 mu_f = 1.0
-F = 1.0
+
 ndim = 2
 
 zmax = 1.0
@@ -31,7 +32,8 @@ ymax = 1.0
 ymin = 0.0
 xmax = 10.0
 xmin = 0.0
-P_0 = 1.0
+
+
 
 M    = 1.0 / ( phi / K_fl + (alpha - phi) /K_sg)
 K_u = K_d + alpha*alpha*M
@@ -40,9 +42,12 @@ nu_u = (3*K_u - 2*G) / (2*(3*K_u + G))
 kappa = k / mu_f
 a = (xmax - xmin)
 b = (ymax - ymin)
-#c = ( (2*kappa*G) * (1 - nu) * (nu_u - nu) ) / (alpha*alpha * (1 - 2*nu) * (1 - nu) )
+
+F = 1.0*a
+P_0 = F
+
 B_alt = (3 * (nu_u - nu) )/(alpha*(1-2*nu)*(1+nu_u))
-B = (alpha*M) / (K_d + alpha*alpha*M) #
+B = (alpha*M) / (K_d + alpha*alpha*M) 
 A_1 = 3 / (B * (1 + nu_u))
 A_2 = (alpha * (1 - 2*nu))/(1 - nu)
 
@@ -69,19 +74,20 @@ A_2 = (alpha_3*M_11 - alpha_1*M_13) / M_11
 c_x = (kappa_x*M*M_11)/(M_11 + alpha_1*alpha_1*M)
 B_prime = (alpha*M)/(K_d + alpha*alpha*M)
 
-K_v = 2.*G*( (1.-nu) / (1.-2.*nu) )
-c_f = kappa*M*( K_v / (K_v + alpha*alpha*M) )
-c = kappa*M*( K_v / (K_v + alpha*alpha*M) )
+K_nu = 2*G*( (1-nu) / (1-2*nu) )
+c = kappa*M*( K_nu / (K_nu + alpha*alpha*M) )
 # ==============================================================================
 def mandelZeros():
     """
     Compute roots for analytical mandel problem solutions
     """
     zeroArray = np.zeros(ITERATIONS)
+    x0 = 0
+    
+    for i in np.arange(0, ITERATIONS):
+        a1 = x0+np.pi/4
+        a2 = x0+np.pi/2 - 10000*2.2204e-16
 
-    for i in np.arange(1, ITERATIONS+1,1):
-        a1 = (i - 1.0) * np.pi * np.pi / 4.0 + EPS
-        a2 = a1 + np.pi / 2
         am = a1
         for j in np.arange(0, ITERATIONS,1):
             y1 = np.tan(a1) - ((1.0 - nu) / (nu_u - nu))*a1
@@ -95,9 +101,10 @@ def mandelZeros():
             if (np.abs(y2) < EPS):
                 am = a2
         zeroArray[i-1] = am
+        x0 += np.pi
     return zeroArray
 
-def displacement(locs,tsteps,zeroArray):
+def displacement(locs,tsteps,a_n):
     """
     Compute displacement field at locations.
     """
@@ -107,48 +114,56 @@ def displacement(locs,tsteps,zeroArray):
     x = locs[:,0]
     z = locs[:,1]
     t_track = 0
-#    zeroArray = mandelZeros()
 
     for t in tsteps:
-#        A_x = 0.0
-#        B_x = 0.0
-#        A_z = 0.0
 
-        A_x = np.sum( (np.sin(zeroArray)*np.cos(zeroArray) / (zeroArray - np.sin(zeroArray)*np.cos(zeroArray))) * np.exp( -1.0*(zeroArray*zeroArray*c*t)/(a*a) ) )
-        B_x = np.sum((np.cos(zeroArray) / (zeroArray - np.sin(zeroArray)*np.cos(zeroArray))) * np.sin( (zeroArray*x.reshape([x.size,1]))/a) \
-            * np.exp(-1.0*(zeroArray*zeroArray*c*t)/(a*a)),axis=1)
-        A_z = np.sum( (np.sin(zeroArray)*np.cos(zeroArray) / (zeroArray - np.sin(zeroArray)*np.cos(zeroArray)))*np.exp( -1.0*(zeroArray*zeroArray*c*t)/(a*a) ) )
+        ux_sum_A = np.sum( ( np.sin(a_n)*np.cos(a_n) / ( a_n - np.sin(a_n)*np.cos(a_n) ) ) * \
+                       np.exp( -(a_n*a_n*c*t)/(a*a) ) )
 
-
-        #for n in np.arange(1,ITERATIONS+1,1):
-#            a_n = zeroArray[n-1]
-
-            #A_x += (np.sin(a_n)*np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n)))*np.exp(-1.0*(a_n*a_n*c_x*t)/(a*a))
-            #B_x += (np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n))) * np.sin( (a_n*x)/a) * np.exp(-1.0*(a_n*a_n*c_x*t)/(a*a))
+        ux_sum_B = np.sum( ( np.cos(a_n) / ( a_n - np.sin(a_n)*np.cos(a_n) ) ) * \
+                       np.sin( (a_n*x.reshape([x.size,1]) ) / a ) * \
+                       np.exp(-(a_n*a_n*c*t)/(a*a) ),axis=1)
             
-            #A_z += (np.sin(a_n)*np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n)))*np.exp(-1.0*(a_n*a_n*c*t)/(a*a))
+        uy_sum   = np.sum( (np.sin(a_n)*np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n))) * \
+                       np.exp( -(a_n*a_n*c*t)/(a*a) ) )
 
-#            A_x += (np.sin(a_n)*np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n))) * np.exp( -1.0*(a_n*a_n*c_f*t)/(a*a) )
-#            B_x += (np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n))) * np.sin( (a_n*x)/a ) * np.exp( -1.0*(a_n*a_n*c_f*t)/(a*a) )
-            
-#            A_z += (np.sin(a_n)*np.cos(a_n) / (a_n - np.sin(a_n)*np.cos(a_n)))*np.exp( -1.0*(a_n*a_n*c_f*t)/(a*a) )
-        
-#        print('t = ', t, ' A_x= ', A_x)
-#        print('t = ', t, ' B_x= ', B_x)
-#        print('t = ', t, ' A_z= ', A_z)                
 
         # Isotropic Formulation
-#        displacement[t_track,:,0] = ( (F*nu)/(2.*G*a) - (F*nu_u)/(G*a) * A_x )*x + (F/G)*B_x
-#        displacement[t_track,:,1] = ( -(F*(1.-nu))/(2.*G*a) + (F*(1-nu_u))/(G*a) * A_z )*z
+        displacement[t_track,:,0] = (  ( F * nu ) / ( 2 * G * a ) - ( F * nu_u ) / ( G * a ) * ux_sum_A ) * x + ( F / G ) * ux_sum_B
+        displacement[t_track,:,1] = ( -( F * ( 1 - nu ) ) / ( 2 * G * a ) + ( F * ( 1 - nu_u ) ) / ( G * a ) * uy_sum ) * z
 
-        # Orthotropic Formulation
-        displacement[t_track,:,0] = (F/a * M_13/(M_11*M_33 - M_13*M_13) - (2.*F)/a * (alpha_1*alpha_3*M + M_13)/(A_1*M*(alpha_3*M_11 - alpha_1*M_13))*A_x)*x + (2.*F*alpha_1)/(A_2*M_11) * B_x
-        displacement[t_track,:,1] = (-F/a)*(M_11/(M_11*M_33 - M_13*M_13)) * (1.0 + 2.0*(A_2/A_1 - 1.0) * A_z)*z
         t_track += 1
 
     return displacement
 
-def pressure(locs, tsteps, zeroArray):
+def displacement_AB(locs,tsteps,zeroArray):
+    """
+    Compute displacement field at locations.
+    """
+    (npts, dim) = locs.shape
+    ntpts = tsteps.shape[0]
+    displacement = np.zeros((ntpts, npts, dim), dtype=np.float64)
+    x = locs[:,0]
+    z = locs[:,1]
+    t_track = 0
+    A_array = np.zeros(ntpts)
+    B_array = np.zeros([x.size,ntpts])
+    for t in tsteps:
+
+        A_array[t_track] = np.sum( (np.sin(zeroArray)*np.cos(zeroArray) / (zeroArray - np.sin(zeroArray)*np.cos(zeroArray))) * \
+                       np.exp( -(zeroArray*zeroArray*c*t)/(a*a) ) )
+
+        B_array[:,t_track] = np.sum( (np.cos(zeroArray) / (zeroArray - np.sin(zeroArray)*np.cos(zeroArray))) * \
+                       np.sin( (zeroArray*x.reshape([x.size,1]))/a) * \
+                       np.exp(-(zeroArray*zeroArray*c*t)/(a*a)),axis=1)
+
+        t_track += 1
+
+    return A_array, B_array
+
+
+
+def pressure(locs, tsteps, a_n):
     """
     Compute pressure field at locations.
     """
@@ -158,28 +173,13 @@ def pressure(locs, tsteps, zeroArray):
     x = locs[:,0]
     z = locs[:,1]
     t_track = 0
-#    zeroArray = mandelZeros()
-    p_0 = (1./(3.*a))*B*(1+nu_u)*F
-    for t in tsteps:
-        p = np.sum( np.sin(zeroArray)/(zeroArray - np.sin(zeroArray)*np.cos(zeroArray)) * (np.cos( (zeroArray*x.reshape([x.size,1]))/a) \
-                    - np.cos(zeroArray))*np.exp(-1.0*(zeroArray*zeroArray*c*t)/(a*a)), axis=1 )
-        
-#        if t == 0.0:
-#            pressure[t_track,:] = (1./(3.*a))*(B*(1.+nu_u))*F
-#        else:
-#            p = np.sum( (np.sin(zeroArray) / (zeroArray - np.sin(zeroArray)*np.cos(zeroArray))) \
-#                        * (np.cos( (zeroArray*x.reshape([x.size,1])) / a) - np.cos(zeroArray)) * np.exp(-1.0*(zeroArray*zeroArray * c_x * t)/(a*a)), axis=1 )
-#            p = 0.0
-#            for n in np.arange(1, ITERATIONS+1,1):
-#                x_n = zeroArray[n-1]
-#                p += (np.sin(x_n) / (x_n - np.sin(x_n)*np.cos(x_n))) * (np.cos( (x_n*x) / a) - np.cos(x_n)) * np.exp(-1.0*(x_n*x_n * c_x * t)/(a*a))
-#            pressure[t_track,:] = (2.*F)/(a*A_1)  * p
 
-        # Isotropic Formulation
-#        pressure[t_track,:] = 2.0*p_0 * p
+    for t in tsteps:
+        p = np.sum( np.sin(a_n) / ( a_n - np.sin(a_n) * np.cos(a_n) ) * \
+                  ( np.cos( ( a_n * x.reshape( [ x.size, 1 ] ) ) / a ) - np.cos(a_n) ) * \
+                  np.exp( -(a_n*a_n*c*t)/(a*a)), axis=1 )
         
-        # Orthotropic Formulation
-        pressure[t_track,:] = (2.*F)/(a*A_1)  * p        
+        pressure[t_track,:] = ( 2 * F * B * ( 1 + nu_u ) ) / ( 3 * a ) * p
         t_track += 1
 
     return pressure
@@ -213,6 +213,32 @@ def trace_strain(locs, tsteps, zeroArray):
 
     return trace_strain
 
+# ==============================================================================
+# Generate positive solutions to characteristic equation
+
+def mandel_zeros(nu, nu_u,n_series=200):
+    # Solutions to tan(x) - ((1-nu)/(nu_u-nu)) x = 0
+    """
+    This is somehow tricky, we have to solve the equation numerically in order to
+    find all the positive solutions to the equation. Later we will use them to 
+    compute the infinite sums. Experience has shown that 200 roots are more than enough to
+    achieve accurate results. Note that we find the roots using the bisection method.
+    """
+    f      = lambda x: np.tan(x) - ((1-nu)/(nu_u-nu))*x # define the algebraic eq. as a lambda function
+#    n_series = 200           # number of roots
+    a_n = np.zeros(n_series) # initializing roots array
+    x0 = 0                   # initial point
+    for i in range(0,len(a_n)):
+        a_n[i] = opt.bisect( f,                           # function
+                             x0+np.pi/4,                  # left point 
+                             x0+np.pi/2-10000*2.2204e-16, # right point (a tiny bit less than pi/2)
+                             xtol=1e-30,                  # absolute tolerance
+                             rtol=1e-15                   # relative tolerance
+                           )        
+        x0 += np.pi # apply a phase change of pi to get the next root
+    
+    return a_n
+# ==============================================================================
 
 # ==============================================================================
 f = h5py.File('./output/mandel_quad-domain.h5','r')
@@ -227,16 +253,29 @@ S = f['vertex_fields/trace_strain'][:]
 pos = f['geometry/vertices'][:]
 
 zeroArray = mandelZeros()
+#zeroArray = mandel_zeros(nu,nu_u,ITERATIONS)
 U_exact = displacement(pos, t, zeroArray)
 P_exact = np.reshape(pressure(pos, t, zeroArray),[t.shape[0],pos.shape[0],1])
 #S_exact = trace_strain(pos, t)
 
 # Graph time snapshots
-t_steps = t.ravel()
-t_step_array = np.linspace(0,t_steps.size,5).astype(np.int)
-t_step_array[0] += 2
-t_step_array[-1] -= 1
-#t_step_array = np.array([5, 10, 20, 25, 30])
+#t_steps = t.ravel()
+#t_step_array = np.linspace(0,t_steps.size,5).astype(np.int)
+#t_step_array[0] += 2
+#t_step_array[-1] -= 1
+
+# Define snapshots as per Cheng and Detournay paper
+t_N_step_array = np.array([0.01, 0.1, 0.5, 1.0, 2.0])
+t_step_array_exact = (t_N_step_array*a*a) / c
+
+t_step_array = np.zeros(t_step_array_exact.size)
+
+for item in np.arange(0,t_step_array_exact.size):
+    t_step_array[item] = np.abs(t - t_step_array_exact[item]).argmin()
+
+t_step_array = t_step_array.astype(np.int)    
+
+
 
 t_N = c*t / (a*a)
 P_N = (a*P) / F
@@ -282,13 +321,18 @@ U_final[:,0] = (F*nu*pos[:,0])/(2.*G*a)
 U_final[:,1] = -(F*(1.-nu)*pos[:,1])/(2.*G*a)
 
 P_initial = P[0,:].copy()
-P_initial[:] = 1./(3.*a) * B * (1. + nu_u) * F
+P_initial[:] = 1/(3*a) * B * (1 + nu_u) * F
 
 P_final = P[-1,:].copy()
 P_final[:] = 1./(3.*a) * B * (1. + nu) * F
 
 cm_numeric = ['red','orange','green','blue','indigo', 'violet']
 cm_analytic = ['red','orange','green','blue','indigo', 'violet']
+
+# Y Displacement at ypos
+ypos_loc = np.flatnonzero(pos[:,1]==ymax)
+ypos_y = U_exact[:,np.flatnonzero(pos[:,1]==ymax),1]
+
 
 # ==============================================================================
 # Raw Output
@@ -298,10 +342,12 @@ cm_analytic = ['red','orange','green','blue','indigo', 'violet']
 fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
-# Initial
-ax.plot(pos[z_zero_pos,0], U_initial[z_zero_pos,0], color='black', label='Initial Condition, t = 0+')
-
 #t0
+tstep = 0
+ax.plot(pos[z_zero_pos,0], U[tstep, z_zero_pos,0], color=cm_numeric[-1], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
+ax.plot(pos[z_zero_pos,0], U_exact[tstep, z_zero_pos,0], color=cm_analytic[-1], marker='^', linestyle=' ', label='Analytical, t = ' + np.str(t[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos[z_zero_pos,0], U[tstep, z_zero_pos,0], color=cm_numeric[0], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[z_zero_pos,0], U_exact[tstep, z_zero_pos,0], color=cm_analytic[0], marker='^', linestyle=' ', label='Analytical, t = ' + np.str(t[tstep].ravel()) )
@@ -326,9 +372,6 @@ tstep = t_step_array[4]
 ax.plot(pos[z_zero_pos,0], U[tstep, z_zero_pos,0], color=cm_numeric[4], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[z_zero_pos,0], U_exact[tstep, z_zero_pos,0], color=cm_analytic[4], marker='^', linestyle=' ', label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
-# Final
-ax.plot(pos[z_zero_pos,0], U_final[z_zero_pos,0], color='black', marker='^', linestyle='--', label='Final Condition, t = inf')
-
 ax.grid()
 ax.legend(loc='best')
 ax.set(xlabel='Distance, m', ylabel='Displacement, m', title="Mandel's Problem: X Displacement along z = 0")
@@ -341,11 +384,12 @@ fig.show()
 fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
-
-# Initial
-ax.plot(pos[z_zero_pos,0], P_initial[z_zero_pos], color='black', label='Initial Condition, t = 0+')
-
 #t0
+tstep = 0
+ax.plot(pos[z_zero_pos,0], P[tstep, z_zero_pos], color=cm_numeric[-1], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
+ax.plot(pos[z_zero_pos,0], P_exact[tstep, z_zero_pos], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos[z_zero_pos,0], P[tstep, z_zero_pos], color=cm_numeric[0], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[z_zero_pos,0], P_exact[tstep, z_zero_pos], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
@@ -370,9 +414,6 @@ tstep = t_step_array[4]
 ax.plot(pos[z_zero_pos,0], P[tstep, z_zero_pos], color=cm_numeric[4], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[z_zero_pos,0], P_exact[tstep, z_zero_pos], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
-# Final
-ax.plot(pos[z_zero_pos,0], P_final[z_zero_pos], color='black', marker='^', linestyle='--', label='Final Condition, t = inf')
-
 ax.grid()
 ax.legend(loc='best')
 ax.set(xlabel='Distance, m', ylabel='Pressure, Pa', title="Mandel's Problem: Pressure along z = 0")
@@ -386,10 +427,12 @@ fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
 
-# Initial
-ax.plot(pos[x_zero_pos,0], P_initial[x_zero_pos], color='black', label='Initial Condition, t = 0+')
-
 #t0
+tstep = 0
+ax.plot(pos[x_zero_pos,1], P[tstep, x_zero_pos], color=cm_numeric[-1], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
+ax.plot(pos[x_zero_pos,1], P_exact[tstep, x_zero_pos], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos[x_zero_pos,1], P[tstep, x_zero_pos], color=cm_numeric[0], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[x_zero_pos,1], P_exact[tstep, x_zero_pos], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
@@ -414,8 +457,6 @@ tstep = t_step_array[4]
 ax.plot(pos[x_zero_pos,1], P[tstep, x_zero_pos], color=cm_numeric[4], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[x_zero_pos,1], P_exact[tstep, x_zero_pos], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
-# Final
-ax.plot(pos[x_zero_pos,0], P_final[x_zero_pos], color='black', marker='^', linestyle='--', label='Final Condition, t = inf')
 
 ax.grid()
 ax.legend(loc='best')
@@ -429,10 +470,12 @@ fig.show()
 fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
-# Initial
-ax.plot(pos[x_zero_pos,1], U_initial[x_zero_pos,1], color='black', label='Initial Condition, t = 0+')
-
 #t0
+tstep = 0
+ax.plot(pos[x_zero_pos,1], U[tstep, x_zero_pos,1], color=cm_numeric[-1], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
+ax.plot(pos[x_zero_pos,1], U_exact[tstep, x_zero_pos,1], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos[x_zero_pos,1], U[tstep, x_zero_pos,1], color=cm_numeric[0], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[x_zero_pos,1], U_exact[tstep, x_zero_pos,1], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
@@ -457,8 +500,6 @@ tstep = t_step_array[4]
 ax.plot(pos[x_zero_pos,1], U[tstep, x_zero_pos,1], color=cm_numeric[4], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(pos[x_zero_pos,1], U_exact[tstep, x_zero_pos,1], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
-# Final
-ax.plot(pos[x_zero_pos,1], U_final[x_zero_pos,1], color='black', marker='^', linestyle='--', label='Final Condition, t = inf')
 
 ax.grid()
 ax.legend(loc='best')
@@ -479,6 +520,11 @@ fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
 #t0
+tstep = 0
+ax.plot(pos_N[z_zero_pos,0], P_N[tstep, z_zero_pos], color=cm_numeric[-1], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
+ax.plot(pos_N[z_zero_pos,0], P_exact_N[tstep, z_zero_pos], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos_N[z_zero_pos,0], P_N[tstep, z_zero_pos], color=cm_numeric[0], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(pos_N[z_zero_pos,0], P_exact_N[tstep, z_zero_pos], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
@@ -517,6 +563,11 @@ fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
 #t0
+tstep = 0
+ax.plot(pos_N[x_zero_pos,1], P_N[tstep, x_zero_pos], color=cm_numeric[-1], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
+ax.plot(pos_N[x_zero_pos,1], P_exact_N[tstep, x_zero_pos], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos_N[x_zero_pos,1], P_N[tstep, x_zero_pos], color=cm_numeric[0], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(pos_N[x_zero_pos,1], P_exact_N[tstep, x_zero_pos], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
@@ -556,6 +607,11 @@ fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
 #t0
+tstep = 0
+ax.plot(pos_N[z_zero_pos,0], U_N[tstep, z_zero_pos,0], color=cm_numeric[-1], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
+ax.plot(pos_N[z_zero_pos,0], U_exact_N[tstep, z_zero_pos,0], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos_N[z_zero_pos,0], U_N[tstep, z_zero_pos,0], color=cm_numeric[0], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(pos_N[z_zero_pos,0], U_exact_N[tstep, z_zero_pos,0], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
@@ -593,6 +649,11 @@ fig, ax = plt.subplots()
 fig.set_size_inches(15,10)
 
 #t0
+tstep = 0
+ax.plot(pos_N[x_zero_pos,1], U_N[tstep, x_zero_pos,1], color=cm_numeric[-1], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
+ax.plot(pos_N[x_zero_pos,1], U_exact_N[tstep, x_zero_pos,1], color=cm_analytic[-1], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
+
+#t1
 tstep = t_step_array[0]
 ax.plot(pos_N[x_zero_pos,1], U_N[tstep, x_zero_pos,1], color=cm_numeric[0], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(pos_N[x_zero_pos,1], U_exact_N[tstep, x_zero_pos,1], color=cm_analytic[0], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
