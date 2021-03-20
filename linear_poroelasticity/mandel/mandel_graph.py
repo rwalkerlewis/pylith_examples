@@ -273,6 +273,7 @@ t_step_array = np.zeros(t_step_array_exact.size)
 for item in np.arange(0,t_step_array_exact.size):
     t_step_array[item] = np.abs(t - t_step_array_exact[item]).argmin()
 
+t_step_array[0] = 0
 t_step_array = t_step_array.astype(np.int)    
 
 
