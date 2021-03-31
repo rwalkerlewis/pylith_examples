@@ -225,9 +225,9 @@ ax.semilogx(t_N, P_exact_N[:,center,0], cm_analytic[1],marker='^', linestyle=' '
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Time, t*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure at Center")
+ax.set(xlabel='Normalized Time, t*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure at Center, Tet Mesh")
 fig.tight_layout()
-fig.savefig('output/cryer_pressure_at_center.png',dpi = 300)
+fig.savefig('output/cryer_pressure_at_center_tet.png',dpi = 300)
 fig.show()
 
 # Normalized Pore Pressure along x axis
@@ -267,9 +267,9 @@ ax.plot(R[x_slice], P_exact_N[tstep, x_slice,0], color=cm_analytic[5], marker='^
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure Along X Axis")
+ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure Along X Axis, Tet Mesh")
 fig.tight_layout()
-fig.savefig('output/cryer_pressure_along_x_axis.png',dpi = 300)
+fig.savefig('output/cryer_pressure_along_x_axis_tet.png',dpi = 300)
 fig.show()
 
 # Normalized Radial Displacement along x axis
@@ -309,9 +309,9 @@ ax.plot(R[x_slice], U_exact_N[tstep, x_slice,0], color=cm_analytic[5], marker='^
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Radial Displacement, U*', title="Cryer's Problem: Normalized Radial Displacement Along X Axis")
+ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Radial Displacement, U*', title="Cryer's Problem: Normalized Radial Displacement Along X Axis, Tet Mesh")
 fig.tight_layout()
-fig.savefig('output/cryer_radial_displacement_along_x_axis.png',dpi = 300)
+fig.savefig('output/cryer_radial_displacement_along_x_axis_tet.png',dpi = 300)
 fig.show()
 
 
