@@ -1,0 +1,74 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 03/30/2021 05:56:00 PM
+## Command Options:
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/cryer"
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite

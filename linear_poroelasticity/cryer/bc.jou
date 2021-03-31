@@ -1,42 +1,35 @@
 # ----------------------------------------------------------------------
-# Reset geometry.
+# Create nodeset for curved edge Neumann
 # ----------------------------------------------------------------------
-reset
+group "surface_traction" add node in surface 37
+nodeset 1 group surface_traction
+nodeset 1 name "surface_traction"
 
 # ----------------------------------------------------------------------
-# Generate geometry
+# Create nodeset for curved edge Dirichlet
 # ----------------------------------------------------------------------
-playback 'geometry.jou'
+group "surface_pressure" add node in surface 37
+nodeset 2 group surface_pressure
+nodeset 2 name "surface_pressure"
 
 # ----------------------------------------------------------------------
-# Set discretization size
+# Create nodeset for -x edge Dirichlet
 # ----------------------------------------------------------------------
-volume all size {0.1*m}
-
-
-# ----------------------------------------------------------------------
-# Generate the mesh
-# ----------------------------------------------------------------------
-volume all scheme tetprimitive 
-mesh volume all
+group "x_neg" add node in surface 35
+nodeset 3 group x_neg
+nodeset 3 name "x_neg"
 
 # ----------------------------------------------------------------------
-# Create blocks for materials
+# Create nodeset for -y edge Dirichlet
 # ----------------------------------------------------------------------
-block 1 volume 3
-block 1 name "poroelastic"
-block 1 element type hex8
+group "y_neg" add node in surface 36
+nodeset 4 group y_neg
+nodeset 4 name "y_neg"
 
 # ----------------------------------------------------------------------
-# Mark entities for boundary conditions, etc.
+# Create nodeset for -z edge Dirichlet
 # ----------------------------------------------------------------------
-playback 'bc.jou'
-
-# ----------------------------------------------------------------------
-# Export exodus file
-# ----------------------------------------------------------------------
-export mesh "mesh_hex.exo" dimension 3 overwrite
-
-
-
+group "z_neg" add node in surface 34
+nodeset 5 group z_neg
+nodeset 5 name "z_neg"
 

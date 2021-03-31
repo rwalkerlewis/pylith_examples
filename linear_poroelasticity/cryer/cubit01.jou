@@ -2,9 +2,9 @@
 ## Trelis Version 16.1.1
 ## Trelis Build 1b15f60
 ## Revised Tue Aug 23 16:17:41 2016 -0600
-## Running 03/04/2021 03:32:10 PM
+## Running 03/30/2021 02:44:10 PM
 ## Command Options:
-cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/cryer"
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/cryer/hex8"
 # -*- Python -*-
 # ----------------------------------------------------------------------
 # Set units to SI.
@@ -14,13 +14,13 @@ ${Units('si')}
 # Reset geometry.
 # ----------------------------------------------------------------------
 reset
-# Sphere is 10m in radius
-create sphere radius 10
+# Sphere is 1m in radius
+create sphere radius 1
 webcut body all xplane
 webcut body all yplane
 webcut body all zplane
 delete volume 2 3 4 5 6 7 8
-volume 1 size 1
+volume 1 size 0.5
 volume 1 scheme tetprimitive
 block 1 volume 1
 block all element type HEX8
@@ -42,4 +42,1805 @@ nodeset 4 name "x_neg"
 group "y_pos" add node in surface 20
 nodeset 5 y_pos
 nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.05
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_pos" add node in surface 18
+nodeset 3 z_pos
+nodeset 3 name "z_pos"
+group "x_neg" add node in surface 21
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_pos" add node in surface 20
+nodeset 5 y_pos
+nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.1
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_pos" add node in surface 18
+nodeset 3 z_pos
+nodeset 3 name "z_pos"
+group "x_neg" add node in surface 21
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_pos" add node in surface 20
+nodeset 5 y_pos
+nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.2
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_pos" add node in surface 18
+nodeset 3 z_pos
+nodeset 3 name "z_pos"
+group "x_neg" add node in surface 21
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_pos" add node in surface 20
+nodeset 5 y_pos
+nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.05
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_pos" add node in surface 18
+nodeset 3 z_pos
+nodeset 3 name "z_pos"
+group "x_neg" add node in surface 21
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_pos" add node in surface 20
+nodeset 5 y_pos
+nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 2 3 4 5 6 7 8
+volume 1 size 0.1
+volume 1 scheme tetprimitive
+block 1 volume 1
+block all element type HEX8
+mesh volume 1
+#refine volume 1 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 19
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 19
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_pos" add node in surface 18
+nodeset 3 z_pos
+nodeset 3 name "z_pos"
+group "x_neg" add node in surface 21
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_pos" add node in surface 20
+nodeset 5 y_pos
+nodeset 5 name "y_pos"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+mesh volume 3
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+nodeset 3 z_pos
+nodeset 4 x_neg
+nodeset 5 y_pos
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+mesh volume 3
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+nodeset 4 x_neg
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+mesh volume 3
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+nodeset 3 z_neg
+nodeset 4 x_neg
+nodeset 5 y_neg
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+mesh volume 3
+set duplicate block elements off
+nodeset 1 surface_traction
+nodeset 2 surface_pressure
+nodeset 3 z_neg
+nodeset 4 x_neg
+nodeset 5 y_neg
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.1
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.01
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+refine volume 3 numsplit 1 bias 1 smooth
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.1
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.01
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+#refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.1
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+#refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.05
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+#refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.5
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+#refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.1
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+#refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "z_neg" add node in surface 34
+nodeset 3 z_neg
+nodeset 3 name "z_neg"
+group "x_neg" add node in surface 35
+nodeset 4 x_neg
+nodeset 4 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 5 y_neg
+nodeset 5 name "y_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+volume 3 size 0.1
+volume 3 scheme tetprimitive
+block 3 volume 3
+block all element type HEX8
+mesh volume 3
+#refine volume 3 numsplit 1 bias 1 smooth
+set duplicate block elements off
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+export mesh "mesh_hex.exo" dimension 3 overwrite
+cd "/home/dockimble/pylith_ii/cig/pylith-knepley/feature-petsc-fe/tests/fullscale/poroelasticity/cryer"
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+nodeset 1 surface_traction
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+nodeset 2 surface_pressure
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_tet.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_tet.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+#block 1 volume 1
+#block 1 name "poroelastic"
+#block 1 element type tetra4
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_tet.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type TETRA4
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_tet.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_pos" add node in surface 36
+nodeset 4 y_pos
+nodeset 4 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetmesh
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type TETRA4
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_tet.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size 0.01
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {0.02*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {0.04*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Sphere is 1m in radius
+create sphere radius 1
+webcut body all xplane
+webcut body all yplane
+webcut body all zplane
+delete volume 1 2 4 5 6 7 8
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {0.1*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme tetprimitive
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 3
+block 1 name "poroelastic"
+block 1 element type HEX8
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 37
+nodeset 1 surface_traction
+nodeset 1 name "surface_traction"
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 37
+nodeset 2 surface_pressure
+nodeset 2 name "surface_pressure"
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge Dirichlet
+# ----------------------------------------------------------------------
+group "x_neg" add node in surface 35
+nodeset 3 x_neg
+nodeset 3 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in surface 36
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z edge Dirichlet
+# ----------------------------------------------------------------------
+group "z_neg" add node in surface 34
+nodeset 5 z_neg
+nodeset 5 name "z_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
 export mesh "mesh_hex.exo" dimension 3 overwrite

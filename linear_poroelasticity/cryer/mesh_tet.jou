@@ -11,13 +11,12 @@ playback 'geometry.jou'
 # ----------------------------------------------------------------------
 # Set discretization size
 # ----------------------------------------------------------------------
-volume all size {0.1*m}
-
+volume all size 0.1
 
 # ----------------------------------------------------------------------
 # Generate the mesh
 # ----------------------------------------------------------------------
-volume all scheme tetprimitive 
+volume all scheme tetmesh 
 mesh volume all
 
 # ----------------------------------------------------------------------
@@ -25,7 +24,7 @@ mesh volume all
 # ----------------------------------------------------------------------
 block 1 volume 3
 block 1 name "poroelastic"
-block 1 element type hex8
+block 1 element type tetra4
 
 # ----------------------------------------------------------------------
 # Mark entities for boundary conditions, etc.
@@ -35,8 +34,7 @@ playback 'bc.jou'
 # ----------------------------------------------------------------------
 # Export exodus file
 # ----------------------------------------------------------------------
-export mesh "mesh_hex.exo" dimension 3 overwrite
-
+export mesh "mesh_tet.exo" dimension 3 overwrite
 
 
 
