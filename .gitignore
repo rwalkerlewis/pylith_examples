@@ -2,4 +2,5 @@
 *.xmf
 *.txt
 *.json
-
+*.spatialdb
+*.dat
