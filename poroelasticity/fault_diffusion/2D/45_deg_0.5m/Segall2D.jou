@@ -1,0 +1,37 @@
+${Units('si')}
+undo off
+reset
+#{length = 15*km}
+#{height = 2.7*km}
+#{pay = 0.1*km}
+
+#{fault1angle = 60*deg}
+#{fault1width = 20*m}
+#{fault1height = 1000*m}
+#{fault1xpos = 2000*m}
+
+#{fault2angle = 60*deg}
+#{fault2width = 50*m}
+#{fault2height = 2000*m}
+#{fault2xpos = 5000*m}
+
+#{fault3angle = 60*deg}
+#{fault3width = 100*m}
+#{fault3height = 1000*m}
+#{fault3xpos = 10000*m}
+
+## Create surface, shift to positive space
+Create Surface rectangle width {length} height {height} ZPLANE
+
+surface 1 move x {length/2} y {height/2} z 0
+create surface rectangle width {length} height {pay}
+surface 2 move x {length/2} y {height/2} z 0
+
+split surface 1 with surface 2
+merge all
+surface 2 name "formation"
+surface 4 name "basement"
+surface 5 name "mudrock"
+delete body 2
+
+

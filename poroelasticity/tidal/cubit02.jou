@@ -1,0 +1,390 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 05/24/2021 02:42:12 PM
+## Command Options:
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/SPE10"
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {1200.0*ft} y {2200.0*ft} z {170.0*ft}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {10*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {1200.0*ft} y {2200.0*ft} z {170.0*ft}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {5*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {1200.0*ft} y {2200.0*ft} z {170.0*ft}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {10*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {1200.0*ft} y {2200.0*ft} z {170.0*ft}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {2*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map

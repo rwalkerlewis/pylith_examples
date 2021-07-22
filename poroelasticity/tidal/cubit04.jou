@@ -1,0 +1,2589 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 05/26/2021 10:13:05 AM
+## Command Options:
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/SPE10"
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/SPE10/mesh"
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {50*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {30*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {10*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {15*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {35*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+brick x {dx} y {dy} z {dz}
+# Adjust positioning of block such that position vector is positive
+volume  ( at 0 0 0 ordinal 1 ordered )  move x {1200.0/2*ft} y {2200.0/2*ft} z {170.0/2*ft}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 25.908 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 25.908 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in surface  ( at 0 335.28 25.908 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 0 335.28 25.908 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in surface  ( at 365.76 335.28 25.908 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 365.76 335.28 25.908 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in surface  ( at 182.88 670.56 25.908 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 25.908 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 182.88 0 25.908 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 25.908 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+group "boundary_zneg" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 5 boundary_zneg
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 51.816 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 51.816 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+cd "/home/dockimble/pylith_ii/examples/poroelasticity/SPE10/2D/mesh"
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 at 365.76 670.56 0 ordinal 1 ordered ) 
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+nodeset 6 boundary_zpos
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 at 365.76 670.56 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 volume  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+nodeset 6 boundary_zpos
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 at 365.76 670.56 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+nodeset 6 boundary_zpos
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 at 365.76 670.56 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+reset
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 at 365.76 670.56 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 at 365.76 670.56 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+# {dx=762*m}
+# {dy=7.62*m}
+# {dz=15.24*m}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 7.62 0 ordinal 1 at 762 0 0 ordinal 1 at 762 7.62 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 381 3.81 0 ordinal 1 ordered ) 
+block  ( at 381 3.81 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 381 3.81 0 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 381 3.81 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+reset
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+# {dx=762*m}
+# {dy=7.62*m}
+# {dz=15.24*m}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 7.62 0 ordinal 1 at 762 0 0 ordinal 1 at 762 7.62 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 381 3.81 0 ordinal 1 ordered ) 
+block  ( at 381 3.81 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 381 3.81 0 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 381 3.81 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+# {dx=762*m}
+# {dy=7.62*m}
+# {dz=15.24*m}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 7.62 0 ordinal 1 at 762 0 0 ordinal 1 at 762 7.62 0 ordinal 1 ordered ) 
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+#surface all size {7.62*m}
+#surface all scheme submap
+#mesh surface all
+#playback 'bc.jou'
+#export mesh "mesh_quad.exo" dimension 2 overwrite
+reset
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+# {dx=762*m}
+# {dy=7.62*m}
+# {dz=15.24*m}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0 0
+create vertex {dx} {dy} 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 7.62 0 ordinal 1 at 762 0 0 ordinal 1 at 762 7.62 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+#surface all size {7.62*m}
+#surface all scheme submap
+#mesh surface all
+#playback 'bc.jou'
+#export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 762 m x 7.62 m x 15.24 m
+# {dx=762*m}
+# {dy=7.62*m}
+# {dz=15.24*m}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 7.62 0 ordinal 1 at 7627.62 0 0 ordinal 1 at 762 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+#surface all size {7.62*m}
+#surface all scheme submap
+#mesh surface all
+#playback 'bc.jou'
+#export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0.56 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.767 0.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+#surface all size {7.62*m}
+#surface all scheme submap
+#mesh surface all
+#playback 'bc.jou'
+#export mesh "mesh_quad.exo" dimension 2 overwrite
+reset
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} 0.56 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.767 0.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+#surface all size {7.62*m}
+#surface all scheme submap
+#mesh surface all
+#playback 'bc.jou'
+#export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+nodeset 1 boundary_xpos
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+nodeset 2 boundary_xneg
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+nodeset 3 boundary_ypos
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+nodeset 4 boundary_yneg
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+nodeset 5 boundary_zneg
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+group "boundary_zpos" add node in surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+nodeset 6 boundary_zpos
+nodeset  ( at 182.88 335.28 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {7.62*m}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {10*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {20*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {15*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {12*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {14*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {14.5*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {14.25*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {14.20*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 1200' x 2200' x 170'
+# {dx=1200*ft}
+# {dy=2200*ft}
+# {dz=170*ft}
+create vertex 0 0 0
+create vertex 0 {dy} 0
+create vertex {dx} {dy} 0
+create vertex {dx} 0 0
+create surface vertex  ( at 0 0 0 ordinal 1 at 0 670.56 0 ordinal 1 at 365.76 670.56 0 ordinal 1 at 365.76 0 0 ordinal 1 ordered ) 
+#delete vertex all
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size {14.15*ft}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+block 1 surface  ( at 182.88 335.28 0 ordinal 1 ordered ) 
+block  ( at 182.88 335.28 0 ordinal 1 ordered )  name "poroelastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+group "boundary_xpos" add node in curve  ( at 365.76 335.28 0 ordinal 1 ordered ) 
+nodeset 1 boundary_xpos
+nodeset  ( at 365.76 335.28 0 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+group "boundary_xneg" add node in curve  ( at 0 335.28 0 ordinal 1 ordered ) 
+nodeset 2 boundary_xneg
+nodeset  ( at 0 335.28 0 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+group "boundary_ypos" add node in curve  ( at 182.88 670.56 0 ordinal 1 ordered ) 
+nodeset 3 boundary_ypos
+nodeset  ( at 182.88 670.56 0 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in curve  ( at 182.88 0 0 ordinal 1 ordered ) 
+nodeset 4 boundary_yneg
+nodeset  ( at 182.88 0 0 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite

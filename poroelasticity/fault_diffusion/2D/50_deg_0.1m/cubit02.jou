@@ -1,0 +1,66 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 02/03/2021 05:49:00 PM
+## Command Options:
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/mandel"
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+#playback 'geometry.jou'
+# ----------------------------------------------------------------------
+# Create surface using vertices
+# ----------------------------------------------------------------------
+# Block is 10.0 m x 1.0 m
+# 0 m <= x <= 10.0 m 
+# 0 m <= y <= 1.0 m
+reset
+create vertex 0 0 0
+create vertex 0 1 0
+create vertex 10 1 0
+create vertex 10 0 0
+create surface vertex 1 2 3 4
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+surface all size 0.1
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+surface all scheme submap
+mesh surface all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 surface 1
+block 1 name "poroelastic"
+block 1 element type QUAD
+# ----------------------------------------------------------------------
+# Create nodeset for -x edge
+# ----------------------------------------------------------------------
+group "x_neg" add node in curve 1
+nodeset 1 x_neg
+nodeset 1 name "x_neg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y edge
+# ----------------------------------------------------------------------
+group "y_pos" add node in curve 2
+nodeset 2 y_pos
+nodeset 2 name "y_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for +x edge
+# ----------------------------------------------------------------------
+group "x_pos" add node in curve 3
+nodeset 3 x_pos
+nodeset 3 name "x_pos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y edge Dirichlet
+# ----------------------------------------------------------------------
+group "y_neg" add node in curve 4
+nodeset 4 y_neg
+nodeset 4 name "y_neg"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_quad.exo" dimension 2 overwrite

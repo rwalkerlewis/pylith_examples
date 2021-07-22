@@ -1,0 +1,16 @@
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Neumann
+# ----------------------------------------------------------------------
+group "surface_traction" add node in surface 1
+nodeset 1 group surface_traction
+nodeset 1 name "surface_traction"
+
+
+# ----------------------------------------------------------------------
+# Create nodeset for curved edge Dirichlet
+# ----------------------------------------------------------------------
+group "surface_pressure" add node in surface 1
+nodeset 2 group surface_pressure
+nodeset 2 name "surface_pressure"
+
+

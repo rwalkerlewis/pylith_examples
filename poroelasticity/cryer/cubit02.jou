@@ -1,0 +1,1461 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 05/18/2021 04:10:44 PM
+## Command Options:
+cd "/home/dockimble/pylith_ii/examples/linear_poroelasticity/tidal"
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# CUBIT/Trelis journal file for generating a tet mesh of the subduction zone.
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# This file is called from the mesh file (mesh_tet.jou or
+# mesh_hex.jou). You can also run this file separately to examine how
+# the geometry is constructed.
+# We use the CUBIT/Trelis support for APREPRO (the expressions in
+# braces), which includes units and mathematical functions. See the
+# APREPRO section in the appendix of the CUBIT/Trelis documentation
+# for more information.
+# We use the Id() APPREPRO function to get the id of various objects
+# and rename them for future reference.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Import slab surfaces and construct slab.
+# ----------------------------------------------------------------------
+# We name the surface, volume, and body for future reference.
+import acis "surf_slabtop.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+import acis "surf_slabbot.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+${idVol=Id("volume")}
+# ----------------------------------------------------------------------
+# Create block for domain.
+# ----------------------------------------------------------------------
+# Block is 800 km x 800 km x 400 km
+${blockLength=800.0*km}
+${blockWidth=800.0*km}
+${blockHeight=400.0*km}
+brick x {blockLength} y {blockWidth} z {blockHeight}
+${idVol=Id("volume")}
+volume {idVol} name "v_domain"
+# Translate block so the top is at z=0 and the domain is roughly
+# centered on the subduction zone.
+${moveX=-60.0*km}
+${moveY=0.0*km}
+volume v_domain move x {moveX} y {moveY} z {-0.5*blockHeight}
+# ----------------------------------------------------------------------
+# Webcut block with slab.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create planar horizontal surface for continental crust/mantle boundary.
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-40.0*km}
+${idSurf=Id("surface")}
+surface {idSurf} name "s_moho"
+delete s_moho
+# ----------------------------------------------------------------------
+# Import splay fault surface and cut the crust volume.
+# ----------------------------------------------------------------------
+import acis "surf_splay.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+# ----------------------------------------------------------------------
+# Create fault patch
+# ----------------------------------------------------------------------
+# In order to make it easier to specify slip on a subset 200 km
+# along-strike section of the subduction interface, we inscribe curves
+# on the sheet body corresponding to the subducting slab. This allows
+# us to imprint this patch on the domain volumes, resulting in
+# splitting the subduction interface into multiple pieces.
+# Create block with horizontal dimensions matching the desired rupture
+# patch. The x and z dimensions are set to exceed the dimensions of
+# the subducting interface so that the fault patch reaches the trench
+# and extends to the bottom of the crust.
+${patchLength=200.0*km}
+brick x {400.0*km} y {patchLength} z {100.0*km}
+${idVol=Id("volume")}
+volume {idVol} name "v_patchblock"
+move v_patchblock x {-100*km} y 0 z 0
+# Enscribe the rupture patch onto the geometry of the subducting slab
+# surface (volumes of sheet bodies).
+# Imprint rupture patch from sheet bodies onto domain volumes.
+# Remove sheet body volumes.
+# ----------------------------------------------------------------------
+# Imprint all volumes, then merge.
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+# End of file
+# Set paving scheme on +y boundary.
+surface 45 48 39 18 scheme pave
+# Set paving scheme on -y boundary.
+surface 43 50 21 36 scheme pave
+surface all size {25.0*km}
+volume v_domain scheme sweep source surface 18 target surface 21
+volume all size {25.0*km}
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks and nodesets for materials and boundary conditions.
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# This file is called from the mesh file (mesh_tet.jou or mesh_hex.jou).
+# CUBIT/Trelis journal file for setting blocks and nodesets for the meshes
+# created by mesh_tet.jou and mesh_hex.jou.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# We create a block for each material in the PyLith simulations. In
+# the PyLith parameters, we will set the material 'id' to the block
+# 'id' here to indcate which cells correspond to a given material.
+block 1 v_domain
+block 1 name "slab"
+# ----------------------------------------------------------------------
+# Create nodesets for faults and boundary conditions.
+# ----------------------------------------------------------------------
+# Create group for slab, so that we can easily remove the overlap with
+# boundaries to prevent constraining the subduction of the slab.
+group "block_slab" add node in v_domain
+# ----------------------------------------------------------------------
+# FAULT INTERFACES
+# ----------------------------------------------------------------------
+# Entire top of slab
+# Buried edge for top of slab.
+nodeset 11 fault_slabtop_edge
+# Entire bottom of slab
+# Buried edge for bottom of slab.
+nodeset 21 fault_slabbot_edge
+# Entire splay fault
+# Buried edge for splay fault.
+nodeset 31 fault_splay_edge
+# Top of slab rupture patch.
+# Buried edge for top of slab rupture patch.
+nodeset 41 fault_slabtop_patch_edge
+# Splay fault rupture patch.
+# Buried edge for top of slab rupture patch.
+nodeset 51 fault_splay_patch_edge
+# ----------------------------------------------------------------------
+# BOUNDARIES
+# ----------------------------------------------------------------------
+# +x
+nodeset 80 boundary_xpos
+# -x
+group "boundary_xneg" add node in surface 20
+nodeset 81 boundary_xneg
+nodeset 81 name "boundary_xneg"
+# -x w/o fault
+group "boundary_xneg_nofault" add node in boundary_xneg
+nodeset 82 boundary_xneg_nofault
+nodeset 82 name "boundary_xneg_nofault"
+# -x w/o slab
+group "boundary_xneg_noslab" add node in boundary_xneg
+group "boundary_xneg_noslab" remove node in block_slab
+nodeset 83 boundary_xneg_noslab
+# -y
+group "boundary_yneg" add node in surface 18
+nodeset 84 boundary_yneg
+nodeset 84 name "boundary_yneg"
+# +y w/o fault
+group "boundary_yneg_nofault" add node in boundary_yneg
+nodeset 85 boundary_yneg_nofault
+nodeset 85 name "boundary_yneg_nofault"
+# +y w/o slab
+group "boundary_yneg_noslab" add node in boundary_yneg
+group "boundary_yneg_noslab" remove node in block_slab
+nodeset 86 boundary_yneg_noslab
+# +y
+group "boundary_ypos" add node in surface 21
+nodeset 87 boundary_ypos
+nodeset 87 name "boundary_ypos"
+# -y w/o fault
+group "boundary_ypos_nofault" add node in boundary_ypos
+nodeset 88 boundary_ypos_nofault
+nodeset 88 name "boundary_ypos_nofault"
+# -y w/o slab
+group "boundary_ypos_noslab" add node in boundary_ypos
+group "boundary_ypos_noslab" remove node in block_slab
+nodeset 89 boundary_ypos_noslab
+# -z
+nodeset 90 boundary_zneg
+# +z
+group "boundary_zpos" add node in surface 19
+nodeset 91 boundary_zpos
+nodeset 91 name "boundary_zpos"
+# End of file
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# End of file
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# CUBIT/Trelis journal file for generating a tet mesh of the subduction zone.
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# This file is called from the mesh file (mesh_tet.jou or
+# mesh_hex.jou). You can also run this file separately to examine how
+# the geometry is constructed.
+# We use the CUBIT/Trelis support for APREPRO (the expressions in
+# braces), which includes units and mathematical functions. See the
+# APREPRO section in the appendix of the CUBIT/Trelis documentation
+# for more information.
+# We use the Id() APPREPRO function to get the id of various objects
+# and rename them for future reference.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Import slab surfaces and construct slab.
+# ----------------------------------------------------------------------
+# We name the surface, volume, and body for future reference.
+import acis "surf_slabtop.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+import acis "surf_slabbot.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+${idVol=Id("volume")}
+# ----------------------------------------------------------------------
+# Create block for domain.
+# ----------------------------------------------------------------------
+# Block is 800 km x 800 km x 400 km
+${blockLength=800.0*km}
+${blockWidth=800.0*km}
+${blockHeight=400.0*km}
+brick x {blockLength} y {blockWidth} z {blockHeight}
+${idVol=Id("volume")}
+volume {idVol} name "v_domain"
+# Translate block so the top is at z=0 and the domain is roughly
+# centered on the subduction zone.
+${moveX=-60.0*km}
+${moveY=0.0*km}
+volume v_domain move x {moveX} y {moveY} z {-0.5*blockHeight}
+# ----------------------------------------------------------------------
+# Webcut block with slab.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create planar horizontal surface for continental crust/mantle boundary.
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-40.0*km}
+${idSurf=Id("surface")}
+surface {idSurf} name "s_moho"
+delete s_moho
+# ----------------------------------------------------------------------
+# Import splay fault surface and cut the crust volume.
+# ----------------------------------------------------------------------
+import acis "surf_splay.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+# ----------------------------------------------------------------------
+# Create fault patch
+# ----------------------------------------------------------------------
+# In order to make it easier to specify slip on a subset 200 km
+# along-strike section of the subduction interface, we inscribe curves
+# on the sheet body corresponding to the subducting slab. This allows
+# us to imprint this patch on the domain volumes, resulting in
+# splitting the subduction interface into multiple pieces.
+# Create block with horizontal dimensions matching the desired rupture
+# patch. The x and z dimensions are set to exceed the dimensions of
+# the subducting interface so that the fault patch reaches the trench
+# and extends to the bottom of the crust.
+${patchLength=200.0*km}
+brick x {400.0*km} y {patchLength} z {100.0*km}
+${idVol=Id("volume")}
+volume {idVol} name "v_patchblock"
+move v_patchblock x {-100*km} y 0 z 0
+# Enscribe the rupture patch onto the geometry of the subducting slab
+# surface (volumes of sheet bodies).
+# Imprint rupture patch from sheet bodies onto domain volumes.
+# Remove sheet body volumes.
+# ----------------------------------------------------------------------
+# Imprint all volumes, then merge.
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+# End of file
+# Uniform resolution tetmesh.
+volume all scheme tetmesh
+volume all size {25.0*km}
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks and nodesets for materials and boundary conditions.
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# This file is called from the mesh file (mesh_tet.jou or mesh_hex.jou).
+# CUBIT/Trelis journal file for setting blocks and nodesets for the meshes
+# created by mesh_tet.jou and mesh_hex.jou.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# We create a block for each material in the PyLith simulations. In
+# the PyLith parameters, we will set the material 'id' to the block
+# 'id' here to indcate which cells correspond to a given material.
+block 1 v_domain
+block 1 name "slab"
+# ----------------------------------------------------------------------
+# Create nodesets for faults and boundary conditions.
+# ----------------------------------------------------------------------
+# Create group for slab, so that we can easily remove the overlap with
+# boundaries to prevent constraining the subduction of the slab.
+group "block_slab" add node in v_domain
+# ----------------------------------------------------------------------
+# FAULT INTERFACES
+# ----------------------------------------------------------------------
+# Entire top of slab
+# Buried edge for top of slab.
+group "fault_slabtop_edge" add node in curve 38
+nodeset 11 fault_slabtop_edge
+nodeset 11 name "fault_slabtop_edge"
+# Entire bottom of slab
+# Buried edge for bottom of slab.
+nodeset 21 fault_slabbot_edge
+# Entire splay fault
+# Buried edge for splay fault.
+nodeset 31 fault_splay_edge
+# Top of slab rupture patch.
+# Buried edge for top of slab rupture patch.
+nodeset 41 fault_slabtop_patch_edge
+# Splay fault rupture patch.
+# Buried edge for top of slab rupture patch.
+nodeset 51 fault_splay_patch_edge
+# ----------------------------------------------------------------------
+# BOUNDARIES
+# ----------------------------------------------------------------------
+# +x
+nodeset 80 boundary_xpos
+# -x
+group "boundary_xneg" add node in surface 20
+nodeset 81 boundary_xneg
+nodeset 81 name "boundary_xneg"
+# -x w/o fault
+group "boundary_xneg_nofault" add node in boundary_xneg
+nodeset 82 boundary_xneg_nofault
+nodeset 82 name "boundary_xneg_nofault"
+# -x w/o slab
+group "boundary_xneg_noslab" add node in boundary_xneg
+group "boundary_xneg_noslab" remove node in block_slab
+nodeset 83 boundary_xneg_noslab
+nodeset 83 name "boundary_xneg_noslab"
+# -y
+group "boundary_yneg" add node in surface 18
+nodeset 84 boundary_yneg
+nodeset 84 name "boundary_yneg"
+# +y w/o fault
+group "boundary_yneg_nofault" add node in boundary_yneg
+nodeset 85 boundary_yneg_nofault
+nodeset 85 name "boundary_yneg_nofault"
+# +y w/o slab
+group "boundary_yneg_noslab" add node in boundary_yneg
+group "boundary_yneg_noslab" remove node in block_slab
+nodeset 86 boundary_yneg_noslab
+nodeset 86 name "boundary_yneg_noslab"
+# +y
+group "boundary_ypos" add node in surface 21
+nodeset 87 boundary_ypos
+nodeset 87 name "boundary_ypos"
+# -y w/o fault
+group "boundary_ypos_nofault" add node in boundary_ypos
+nodeset 88 boundary_ypos_nofault
+nodeset 88 name "boundary_ypos_nofault"
+# -y w/o slab
+group "boundary_ypos_noslab" add node in boundary_ypos
+group "boundary_ypos_noslab" remove node in block_slab
+nodeset 89 boundary_ypos_noslab
+nodeset 89 name "boundary_ypos_noslab"
+# -z
+nodeset 90 boundary_zneg
+# +z
+group "boundary_zpos" add node in surface 19
+nodeset 91 boundary_zpos
+nodeset 91 name "boundary_zpos"
+# End of file
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_tet.exo" dimension 3 overwrite
+# End of file
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# CUBIT/Trelis journal file for generating a tet mesh of the subduction zone.
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# This file is called from the mesh file (mesh_tet.jou or
+# mesh_hex.jou). You can also run this file separately to examine how
+# the geometry is constructed.
+# We use the CUBIT/Trelis support for APREPRO (the expressions in
+# braces), which includes units and mathematical functions. See the
+# APREPRO section in the appendix of the CUBIT/Trelis documentation
+# for more information.
+# We use the Id() APPREPRO function to get the id of various objects
+# and rename them for future reference.
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# ----------------------------------------------------------------------
+# Import slab surfaces and construct slab.
+# ----------------------------------------------------------------------
+# We name the surface, volume, and body for future reference.
+import acis "surf_slabtop.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+import acis "surf_slabbot.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+${idVol=Id("volume")}
+# ----------------------------------------------------------------------
+# Create block for domain.
+# ----------------------------------------------------------------------
+# Block is 800 km x 800 km x 400 km
+${blockLength=800.0*km}
+${blockWidth=800.0*km}
+${blockHeight=400.0*km}
+brick x {blockLength} y {blockWidth} z {blockHeight}
+${idVol=Id("volume")}
+volume {idVol} name "v_domain"
+# Translate block so the top is at z=0 and the domain is roughly
+# centered on the subduction zone.
+${moveX=-60.0*km}
+${moveY=0.0*km}
+volume v_domain move x {moveX} y {moveY} z {-0.5*blockHeight}
+# ----------------------------------------------------------------------
+# Webcut block with slab.
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Create planar horizontal surface for continental crust/mantle boundary.
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-40.0*km}
+${idSurf=Id("surface")}
+surface {idSurf} name "s_moho"
+delete s_moho
+# ----------------------------------------------------------------------
+# Import splay fault surface and cut the crust volume.
+# ----------------------------------------------------------------------
+import acis "surf_splay.sat"
+${idSurf=Id("surface")}
+${idVol=Id("volume")}
+${idBody=Id("body")}
+# ----------------------------------------------------------------------
+# Create fault patch
+# ----------------------------------------------------------------------
+# In order to make it easier to specify slip on a subset 200 km
+# along-strike section of the subduction interface, we inscribe curves
+# on the sheet body corresponding to the subducting slab. This allows
+# us to imprint this patch on the domain volumes, resulting in
+# splitting the subduction interface into multiple pieces.
+# Create block with horizontal dimensions matching the desired rupture
+# patch. The x and z dimensions are set to exceed the dimensions of
+# the subducting interface so that the fault patch reaches the trench
+# and extends to the bottom of the crust.
+${patchLength=200.0*km}
+brick x {400.0*km} y {patchLength} z {100.0*km}
+${idVol=Id("volume")}
+volume {idVol} name "v_patchblock"
+move v_patchblock x {-100*km} y 0 z 0
+# Enscribe the rupture patch onto the geometry of the subducting slab
+# surface (volumes of sheet bodies).
+# Imprint rupture patch from sheet bodies onto domain volumes.
+# Remove sheet body volumes.
+# ----------------------------------------------------------------------
+# Imprint all volumes, then merge.
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+# End of file
+# Set paving scheme on +y boundary.
+surface 45 48 39 18 scheme pave
+# Set paving scheme on -y boundary.
+surface 43 50 21 36 scheme pave
+surface all size {25.0*km}
+volume v_domain scheme sweep source surface 18 target surface 21
+volume all size {25.0*km}
+mesh volume all
+# ----------------------------------------------------------------------
+# Create blocks and nodesets for materials and boundary conditions.
+# ----------------------------------------------------------------------
+# -*- Python -*- (syntax highlighting)
+# ----------------------------------------------------------------------
+# Brad T. Aagaard, U.S. Geological Survey
+# Charles A. Williams, GNS Science
+# Matthew G. Knepley, University of Chicago
+# This code was developed as part of the Computational Infrastructure
+# for Geodynamics (http://geodynamics.org).
+# Copyright (c) 2010-2017 University of California, Davis
+# See COPYING for license information.
+# ----------------------------------------------------------------------
+# This file is called from the mesh file (mesh_tet.jou or mesh_hex.jou).
+# CUBIT/Trelis journal file for setting blocks and nodesets for the meshes
+# created by mesh_tet.jou and mesh_hex.jou.
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+# We create a block for each material in the PyLith simulations. In
+# the PyLith parameters, we will set the material 'id' to the block
+# 'id' here to indcate which cells correspond to a given material.
+block 1 v_domain
+block 1 name "slab"
+# ----------------------------------------------------------------------
+# Create nodesets for faults and boundary conditions.
+# ----------------------------------------------------------------------
+# Create group for slab, so that we can easily remove the overlap with
+# boundaries to prevent constraining the subduction of the slab.
+group "block_slab" add node in v_domain
+# ----------------------------------------------------------------------
+# FAULT INTERFACES
+# ----------------------------------------------------------------------
+# Entire top of slab
+# Buried edge for top of slab.
+nodeset 11 fault_slabtop_edge
+# Entire bottom of slab
+# Buried edge for bottom of slab.
+nodeset 21 fault_slabbot_edge
+# Entire splay fault
+# Buried edge for splay fault.
+nodeset 31 fault_splay_edge
+# Top of slab rupture patch.
+# Buried edge for top of slab rupture patch.
+nodeset 41 fault_slabtop_patch_edge
+# Splay fault rupture patch.
+# Buried edge for top of slab rupture patch.
+nodeset 51 fault_splay_patch_edge
+# ----------------------------------------------------------------------
+# BOUNDARIES
+# ----------------------------------------------------------------------
+# +x
+nodeset 80 boundary_xpos
+# -x
+group "boundary_xneg" add node in surface 20
+nodeset 81 boundary_xneg
+nodeset 81 name "boundary_xneg"
+# -x w/o fault
+group "boundary_xneg_nofault" add node in boundary_xneg
+nodeset 82 boundary_xneg_nofault
+nodeset 82 name "boundary_xneg_nofault"
+# -x w/o slab
+group "boundary_xneg_noslab" add node in boundary_xneg
+group "boundary_xneg_noslab" remove node in block_slab
+nodeset 83 boundary_xneg_noslab
+# -y
+group "boundary_yneg" add node in surface 18
+nodeset 84 boundary_yneg
+nodeset 84 name "boundary_yneg"
+# +y w/o fault
+group "boundary_yneg_nofault" add node in boundary_yneg
+nodeset 85 boundary_yneg_nofault
+nodeset 85 name "boundary_yneg_nofault"
+# +y w/o slab
+group "boundary_yneg_noslab" add node in boundary_yneg
+group "boundary_yneg_noslab" remove node in block_slab
+nodeset 86 boundary_yneg_noslab
+# +y
+group "boundary_ypos" add node in surface 21
+nodeset 87 boundary_ypos
+nodeset 87 name "boundary_ypos"
+# -y w/o fault
+group "boundary_ypos_nofault" add node in boundary_ypos
+nodeset 88 boundary_ypos_nofault
+nodeset 88 name "boundary_ypos_nofault"
+# -y w/o slab
+group "boundary_ypos_noslab" add node in boundary_ypos
+group "boundary_ypos_noslab" remove node in block_slab
+nodeset 89 boundary_ypos_noslab
+# -z
+nodeset 90 boundary_zneg
+# +z
+group "boundary_zpos" add node in surface 19
+nodeset 91 boundary_zpos
+nodeset 91 name "boundary_zpos"
+# End of file
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# End of file
+reset
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {12.0*km} y {12.0*km} z {9.0*km}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+#volume 1 move x 0 y 0 z {-4.5*km}
+volume ( at 0 0 0 ordinal 1 ordered ) move x 0 y 0 z {-4.5*km}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-3.0*km}
+# Name the surface to make it easy to reference later.
+#surface 7 name "material_interface"
+surface ( at 0 0 -3000 ordinal 1 ordered ) name "material_interface"
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+#webcut volume 1 with plane surface material_interface
+webcut volume ( at 0 0 -4500 ordinal 1 ordered ) with plane material_interface
+#volume 1 name "elastic"
+volume ( at 0 0 -1500 ordinal 1 ordered ) name "elastic"
+#volume 3 name "viscoelastic"
+volume ( at 0 0 -6000 ordinal 1 ordered ) name "viscoelastic"
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+#delete body 2
+delete body ( at 0 0 -3000 ordinal 1 ordered )
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {3.0*km}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+#block 1 volume 1 3
+block 1 volume ( at 0 0 -1500 ordinal 1 at 0 0 -6000 ordinal 1 ordered )
+block  ( at 0 0 -4500 ordinal 1 ordered )  name "elastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xpos" add node in surface 12 14
+group "boundary_xpos" add node in surface ( at 6000 0 -1500 ordinal 1 at 6000 0 -6000 ordinal 1 ordered )
+nodeset 20 boundary_xpos
+nodeset  ( at 6000 0 -4500 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xneg" add node in surface 10 16
+group "boundary_xneg" add node in surface ( at -6000 0 -1500 ordinal 1 at -6000 0 -6000 ordinal 1 ordered )
+nodeset 21 boundary_xneg
+nodeset  ( at -6000 0 -4500 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+#group "boundary_ypos" add node in surface  9 17
+group "boundary_ypos" add node in surface ( at 0 6000 -1500 ordinal 1 at 0 6000 -6000 ordinal 1 ordered )
+nodeset 22 boundary_ypos
+nodeset  ( at 0 6000 -4500 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered ) 
+#group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered )
+nodeset 23 boundary_yneg
+nodeset  ( at 0 -6000 -4500 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zneg" add node in surface 2
+group "boundary_zneg" add node in surface ( at 0 0 -9000 ordinal 1 ordered )
+nodeset 24 boundary_zneg
+nodeset  ( at 0 0 -9000 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zpos" add node in surface 1
+group "boundary_zpos" add node in surface ( at 0 0 0 ordinal 1 ordered )
+nodeset 25 boundary_zpos
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {12.0*km} y {12.0*km} z {9.0*km}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+#volume 1 move x 0 y 0 z {-4.5*km}
+volume ( at 0 0 0 ordinal 1 ordered ) move x 0 y 0 z {-4.5*km}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-3.0*km}
+# Name the surface to make it easy to reference later.
+#surface 7 name "material_interface"
+surface ( at 0 0 -3000 ordinal 1 ordered ) name "material_interface"
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+#webcut volume 1 with plane surface material_interface
+webcut volume ( at 0 0 -4500 ordinal 1 ordered ) with plane material_interface
+#volume 1 name "elastic"
+volume ( at 0 0 -1500 ordinal 1 ordered ) name "elastic"
+#volume 3 name "viscoelastic"
+volume ( at 0 0 -6000 ordinal 1 ordered ) name "viscoelastic"
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+#delete body 2
+delete body ( at 0 0 -3000 ordinal 1 ordered )
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {1.0*km}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+#block 1 volume 1 3
+block 1 volume ( at 0 0 -1500 ordinal 1 at 0 0 -6000 ordinal 1 ordered )
+block  ( at 0 0 -4500 ordinal 1 ordered )  name "elastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xpos" add node in surface 12 14
+group "boundary_xpos" add node in surface ( at 6000 0 -1500 ordinal 1 at 6000 0 -6000 ordinal 1 ordered )
+nodeset 20 boundary_xpos
+nodeset  ( at 6000 0 -4500 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xneg" add node in surface 10 16
+group "boundary_xneg" add node in surface ( at -6000 0 -1500 ordinal 1 at -6000 0 -6000 ordinal 1 ordered )
+nodeset 21 boundary_xneg
+nodeset  ( at -6000 0 -4500 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+#group "boundary_ypos" add node in surface  9 17
+group "boundary_ypos" add node in surface ( at 0 6000 -1500 ordinal 1 at 0 6000 -6000 ordinal 1 ordered )
+nodeset 22 boundary_ypos
+nodeset  ( at 0 6000 -4500 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered ) 
+#group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered )
+nodeset 23 boundary_yneg
+nodeset  ( at 0 -6000 -4500 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zneg" add node in surface 2
+group "boundary_zneg" add node in surface ( at 0 0 -9000 ordinal 1 ordered )
+nodeset 24 boundary_zneg
+nodeset  ( at 0 0 -9000 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zpos" add node in surface 1
+group "boundary_zpos" add node in surface ( at 0 0 0 ordinal 1 ordered )
+nodeset 25 boundary_zpos
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {12.0*km} y {12.0*km} z {9.0*km}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+#volume 1 move x 0 y 0 z {-4.5*km}
+volume ( at 0 0 0 ordinal 1 ordered ) move x 0 y 0 z {-4.5*km}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-3.0*km}
+# Name the surface to make it easy to reference later.
+#surface 7 name "material_interface"
+surface ( at 0 0 -3000 ordinal 1 ordered ) name "material_interface"
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+#webcut volume 1 with plane surface material_interface
+webcut volume ( at 0 0 -4500 ordinal 1 ordered ) with plane material_interface
+#volume 1 name "upper"
+#volume 3 name "lower"
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+#delete body 2
+delete body ( at 0 0 -3000 ordinal 1 ordered )
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {1.0*km}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+#block 1 volume 1 3
+block 1 volume ( at 0 0 -1500 ordinal 1 at 0 0 -6000 ordinal 1 ordered )
+block  ( at 0 0 -4500 ordinal 1 ordered )  name "elastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xpos" add node in surface 12 14
+group "boundary_xpos" add node in surface ( at 6000 0 -1500 ordinal 1 at 6000 0 -6000 ordinal 1 ordered )
+nodeset 20 boundary_xpos
+nodeset  ( at 6000 0 -4500 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xneg" add node in surface 10 16
+group "boundary_xneg" add node in surface ( at -6000 0 -1500 ordinal 1 at -6000 0 -6000 ordinal 1 ordered )
+nodeset 21 boundary_xneg
+nodeset  ( at -6000 0 -4500 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+#group "boundary_ypos" add node in surface  9 17
+group "boundary_ypos" add node in surface ( at 0 6000 -1500 ordinal 1 at 0 6000 -6000 ordinal 1 ordered )
+nodeset 22 boundary_ypos
+nodeset  ( at 0 6000 -4500 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered ) 
+#group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered )
+nodeset 23 boundary_yneg
+nodeset  ( at 0 -6000 -4500 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zneg" add node in surface 2
+group "boundary_zneg" add node in surface ( at 0 0 -9000 ordinal 1 ordered )
+nodeset 24 boundary_zneg
+nodeset  ( at 0 0 -9000 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zpos" add node in surface 1
+group "boundary_zpos" add node in surface ( at 0 0 0 ordinal 1 ordered )
+nodeset 25 boundary_zpos
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {12.0*km} y {12.0*km} z {9.0*km}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+#volume 1 move x 0 y 0 z {-4.5*km}
+volume ( at 0 0 0 ordinal 1 ordered ) move x 0 y 0 z {-4.5*km}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-3.0*km}
+# Name the surface to make it easy to reference later.
+#surface 7 name "material_interface"
+surface ( at 0 0 -3000 ordinal 1 ordered ) name "material_interface"
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+#webcut volume 1 with plane surface material_interface
+webcut volume ( at 0 0 -4500 ordinal 1 ordered ) with plane material_interface
+#volume 1 name "upper"
+#volume 3 name "lower"
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+#delete body 2
+delete body ( at 0 0 -3000 ordinal 1 ordered )
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {1.0*km}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+#block 1 volume 1 3
+block 1 volume ( at 0 0 -1500 ordinal 1 at 0 0 -6000 ordinal 1 ordered )
+block  ( at 0 0 -4500 ordinal 1 ordered )  name "elastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xpos" add node in surface 12 14
+group "boundary_xpos" add node in surface ( at 6000 0 -1500 ordinal 1 at 6000 0 -6000 ordinal 1 ordered )
+nodeset 20 boundary_xpos
+nodeset  ( at 6000 0 -4500 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xneg" add node in surface 10 16
+group "boundary_xneg" add node in surface ( at -6000 0 -1500 ordinal 1 at -6000 0 -6000 ordinal 1 ordered )
+nodeset 21 boundary_xneg
+nodeset  ( at -6000 0 -4500 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+#group "boundary_ypos" add node in surface  9 17
+group "boundary_ypos" add node in surface ( at 0 6000 -1500 ordinal 1 at 0 6000 -6000 ordinal 1 ordered )
+nodeset 22 boundary_ypos
+nodeset  ( at 0 6000 -4500 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered ) 
+#group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered )
+nodeset 23 boundary_yneg
+nodeset  ( at 0 -6000 -4500 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zneg" add node in surface 2
+group "boundary_zneg" add node in surface ( at 0 0 -9000 ordinal 1 ordered )
+nodeset 24 boundary_zneg
+nodeset  ( at 0 0 -9000 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zpos" add node in surface 1
+group "boundary_zpos" add node in surface ( at 0 0 0 ordinal 1 ordered )
+nodeset 25 boundary_zpos
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {12.0*km} y {12.0*km} z {9.0*km}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+#volume 1 move x 0 y 0 z {-4.5*km}
+volume ( at 0 0 0 ordinal 1 ordered ) move x 0 y 0 z {-4.5*km}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-3.0*km}
+# Name the surface to make it easy to reference later.
+#surface 7 name "material_interface"
+surface ( at 0 0 -3000 ordinal 1 ordered ) name "material_interface"
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+#webcut volume 1 with plane surface material_interface
+webcut volume ( at 0 0 -4500 ordinal 1 ordered ) with plane material_interface
+#volume 1 name "upper"
+#volume 3 name "lower"
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+#delete body 2
+delete body ( at 0 0 -3000 ordinal 1 ordered )
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {1.0*km}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+#block 1 volume 1 3
+block 1 volume ( at 0 0 -1500 ordinal 1 at 0 0 -6000 ordinal 1 ordered )
+block  ( at 0 0 -4500 ordinal 1 ordered )  name "upper"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xpos" add node in surface 12 14
+group "boundary_xpos" add node in surface ( at 6000 0 -1500 ordinal 1 at 6000 0 -6000 ordinal 1 ordered )
+nodeset 20 boundary_xpos
+nodeset  ( at 6000 0 -4500 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xneg" add node in surface 10 16
+group "boundary_xneg" add node in surface ( at -6000 0 -1500 ordinal 1 at -6000 0 -6000 ordinal 1 ordered )
+nodeset 21 boundary_xneg
+nodeset  ( at -6000 0 -4500 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+#group "boundary_ypos" add node in surface  9 17
+group "boundary_ypos" add node in surface ( at 0 6000 -1500 ordinal 1 at 0 6000 -6000 ordinal 1 ordered )
+nodeset 22 boundary_ypos
+nodeset  ( at 0 6000 -4500 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered ) 
+#group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered )
+nodeset 23 boundary_yneg
+nodeset  ( at 0 -6000 -4500 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zneg" add node in surface 2
+group "boundary_zneg" add node in surface ( at 0 0 -9000 ordinal 1 ordered )
+nodeset 24 boundary_zneg
+nodeset  ( at 0 0 -9000 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zpos" add node in surface 1
+group "boundary_zpos" add node in surface ( at 0 0 0 ordinal 1 ordered )
+nodeset 25 boundary_zpos
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Generate geometry
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Set units to SI.
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Reset geometry.
+# ----------------------------------------------------------------------
+reset
+# Turn on IDless journal files for maximum compatibility.
+# The commands echoed to the log will replace the object ID with a
+# geometric specification of the object. Note that this means changing
+# the geometry will require changes to subsequent journal commands.
+# The commented-out commands below are the commands that were originally
+# used, and the uncommented commands are those that were produced by
+# turning on idless journaling.
+# ----------------------------------------------------------------------
+# Create block
+# ----------------------------------------------------------------------
+# Block is 12km x 12km x 9km
+# -6 km <= x <= 6 km
+# -6 km <= y <= 6 km
+# -9 km <= z <= 0 km
+brick x {12.0*km} y {12.0*km} z {9.0*km}
+# Center of block will be at (0,0,0), so move it down half the height
+# to align the top at z=0.
+#volume 1 move x 0 y 0 z {-4.5*km}
+volume ( at 0 0 0 ordinal 1 ordered ) move x 0 y 0 z {-4.5*km}
+# ----------------------------------------------------------------------
+# Create interface surface between (potential) materials
+# Note: We include this step to demonstrate how to divide volumes into
+# chunks of different materials. We will lump these two volumes
+# together into a single material when we setup the material blocks
+# (see bc.jou).
+# ----------------------------------------------------------------------
+create planar surface with plane zplane offset {-3.0*km}
+# Name the surface to make it easy to reference later.
+#surface 7 name "material_interface"
+surface ( at 0 0 -3000 ordinal 1 ordered ) name "material_interface"
+# ----------------------------------------------------------------------
+# Divide volumes using interface surfaces
+# ----------------------------------------------------------------------
+#webcut volume 1 with plane surface material_interface
+webcut volume ( at 0 0 -4500 ordinal 1 ordered ) with plane material_interface
+#volume 1 name "elastic"
+volume ( at 0 0 -1500 ordinal 1 ordered ) name "elastic"
+#volume 3 name "viscoelastic"
+volume ( at 0 0 -6000 ordinal 1 ordered ) name "viscoelastic"
+# ----------------------------------------------------------------------
+# Imprint all volumes, merging surfaces
+# ----------------------------------------------------------------------
+imprint all with volume all
+merge all
+#delete body 2
+delete body ( at 0 0 -3000 ordinal 1 ordered )
+# End of file
+# ----------------------------------------------------------------------
+# Set discretization size
+# ----------------------------------------------------------------------
+volume all size {1.0*km}
+# ----------------------------------------------------------------------
+# Generate the mesh
+# ----------------------------------------------------------------------
+volume all scheme map
+mesh volume all
+# ----------------------------------------------------------------------
+# Mark entities for boundary conditions, etc.
+# ----------------------------------------------------------------------
+# -*- Python -*-
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# We only use one material in the simulations, so we lump the two
+# meshed volumes into a single block.
+# ----------------------------------------------------------------------
+#block 1 volume 1 3
+block 1 volume ( at 0 0 -1500 ordinal 1 at 0 0 -6000 ordinal 1 ordered )
+block  ( at 0 0 -4500 ordinal 1 ordered )  name "elastic"
+# In order to create nodesets (marking boundaries, faults, etc), we
+# first create a group and then form a nodeset from the group, because
+# we often need to perform boolean operations to get the nodesets we
+# want, and groups suppoert boolean operations (union, intersect, etc)
+# but nodesets do not.
+# ----------------------------------------------------------------------
+# Create nodeset for +x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xpos" add node in surface 12 14
+group "boundary_xpos" add node in surface ( at 6000 0 -1500 ordinal 1 at 6000 0 -6000 ordinal 1 ordered )
+nodeset 20 boundary_xpos
+nodeset  ( at 6000 0 -4500 ordinal 1 ordered )  name "boundary_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x boundary
+# ----------------------------------------------------------------------
+#group "boundary_xneg" add node in surface 10 16
+group "boundary_xneg" add node in surface ( at -6000 0 -1500 ordinal 1 at -6000 0 -6000 ordinal 1 ordered )
+nodeset 21 boundary_xneg
+nodeset  ( at -6000 0 -4500 ordinal 1 ordered )  name "boundary_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y boundary
+# ----------------------------------------------------------------------
+#group "boundary_ypos" add node in surface  9 17
+group "boundary_ypos" add node in surface ( at 0 6000 -1500 ordinal 1 at 0 6000 -6000 ordinal 1 ordered )
+nodeset 22 boundary_ypos
+nodeset  ( at 0 6000 -4500 ordinal 1 ordered )  name "boundary_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y boundary
+# ----------------------------------------------------------------------
+group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered ) 
+#group "boundary_yneg" add node in surface  ( at 0 -6000 -1500 ordinal 1 at 0 -6000 -6000 ordinal 1 ordered )
+nodeset 23 boundary_yneg
+nodeset  ( at 0 -6000 -4500 ordinal 1 ordered )  name "boundary_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zneg" add node in surface 2
+group "boundary_zneg" add node in surface ( at 0 0 -9000 ordinal 1 ordered )
+nodeset 24 boundary_zneg
+nodeset  ( at 0 0 -9000 ordinal 1 ordered )  name "boundary_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z boundary
+# ----------------------------------------------------------------------
+#group "boundary_zpos" add node in surface 1
+group "boundary_zpos" add node in surface ( at 0 0 0 ordinal 1 ordered )
+nodeset 25 boundary_zpos
+nodeset  ( at 0 0 0 ordinal 1 ordered )  name "boundary_zpos"
+# ----------------------------------------------------------------------
+# Export exodus file
+# ----------------------------------------------------------------------
+export mesh "mesh_hex.exo" dimension 3 overwrite
