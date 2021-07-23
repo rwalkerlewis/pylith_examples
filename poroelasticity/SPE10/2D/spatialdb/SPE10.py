@@ -4,6 +4,7 @@ import numpy as np
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy
+import scipy.ndimage
 
 mesh = Dataset('../mesh/mesh_quad.exo','r')
 
@@ -65,4 +66,13 @@ yy = y.reshape([y.shape[0], 1]) * numpy.ones([1, nx])
 xy = numpy.zeros((npts_x*npts_y, 2), dtype=numpy.float64)
 xy[:, 0] = numpy.ravel(xx)
 xy[:, 1] = numpy.ravel(numpy.transpose(yy))
+
+
+# Checkerboard
+factor = 20
+nx_check = np.int32(nx/factor)
+ny_check = np.int32(ny/factor)
+
+check = np.indices([ny_check,nx_check]).sum(axis=0) % 2
+check = scipy.ndimage.zoom(check, factor, order=0)
 
