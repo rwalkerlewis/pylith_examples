@@ -215,7 +215,7 @@ def E_func(x_n, nu, nu_u):
 # ==============================================================================
 
 # ==============================================================================
-f = h5py.File('./output/cryer_hex-poroelastic.h5','r')
+f = h5py.File('./output/step00_hex-poroelastic.h5','r')
 
 t = f['time'][:]
 t = t.ravel()
@@ -288,13 +288,19 @@ z_slice = z_slice[z_arr1inds[::1]]
 center = np.where(~pos.any(axis=1))[0]
 
 
-# Graph time snapshots
-t_steps = t.ravel()
-n_graph_steps = 10
-t_step_array = np.linspace(0,t_steps.size,n_graph_steps).astype(np.int)
-t_step_array[0] += 2
-t_step_array[-1] -= 1
-n_steps = t_N.size
+# Define snapshots as per Cheng and Detournay paper
+t_N_step_array = np.array([0.001, 0.01, 0.1, 0.5, 1.0, 2.0])
+t_step_array_exact = (t_N_step_array*R_0*R_0) / c
+
+t_step_array = np.zeros(t_step_array_exact.size)
+
+for item in np.arange(0,t_step_array_exact.size):
+    t_step_array[item] = np.abs(t - t_step_array_exact[item]).argmin()
+
+t_step_array[0] = 0
+t_step_array = t_step_array.astype(np.int)    
+
+
 
 
 cm_numeric = ['red','orange','green','blue','indigo', 'violet']
@@ -309,7 +315,7 @@ ax.semilogx(t_N, P_exact_N[:,center,0], cm_analytic[1],marker='^', linestyle=' '
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Time, t*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure at Center, Hex Mesh")
+ax.set(xlabel='Normalized Time, t*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure at Center, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_pressure_at_center_hex.png',dpi = 300)
 fig.show()
@@ -345,14 +351,14 @@ ax.plot(R[x_slice], P_N[tstep, x_slice,0], color=cm_numeric[4], label='Numerical
 ax.plot(R[x_slice], P_exact_N[tstep, x_slice,0], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[x_slice], P_N[tstep, x_slice,0], color=cm_numeric[5], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(R[x_slice], P_exact_N[tstep, x_slice,0], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
 
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure Along X Axis, Hex Mesh")
+ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Pressure, P*', title="Cryer's Problem: Normalized Pressure Along X Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_pressure_along_x_axis_norm_hex.png',dpi = 300)
 fig.show()
@@ -393,14 +399,14 @@ ax.plot(R[x_slice], U_exact_R_N[tstep, x_slice,0], color=cm_analytic[4], marker=
 ax.plot(R[x_slice], U_exact_R_N_ST[tstep, x_slice,0], color=cm_analytic[4], marker='+', linestyle=' ',  label='Analytical ST, t* = ' + np.str(t_N[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[x_slice], U_R_N[tstep, x_slice], color=cm_numeric[5], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(R[x_slice], U_exact_R_N[tstep, x_slice,0], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(R[x_slice], U_exact_R_N_ST[tstep, x_slice,0], color=cm_analytic[5], marker='+', linestyle=' ',  label='Analytical ST, t* = ' + np.str(t_N[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Radial Displacement, U*', title="Cryer's Problem: Normalized Radial Displacement Along X Axis, Hex Mesh")
+ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Radial Displacement, U*', title="Cryer's Problem: Normalized Radial Displacement Along X Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_radial_displacement_along_x_axis_norm_hex.png',dpi = 300)
 fig.show()
@@ -441,14 +447,14 @@ ax.plot(R[x_slice], U_exact_R[tstep, x_slice,0], color=cm_analytic[4], marker='^
 ax.plot(R[x_slice], U_exact_R_ST[tstep, x_slice,0], color=cm_analytic[4], marker='+', linestyle=' ',  label='Analytical ST, t = ' + np.str(t[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[x_slice], U_R[tstep, x_slice], color=cm_numeric[5], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[x_slice], U_exact_R[tstep, x_slice,0], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[x_slice], U_exact_R_ST[tstep, x_slice,0], color=cm_analytic[5], marker='+', linestyle=' ',  label='Analytical ST, t = ' + np.str(t[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Radial Distance, R', ylabel='Radial Displacement, U', title="Cryer's Problem: Radial Displacement Along X Axis, Hex Mesh")
+ax.set(xlabel='Radial Distance, R', ylabel='Radial Displacement, U', title="Cryer's Problem: Radial Displacement Along X Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_radial_displacement_along_x_axis_hex.png',dpi = 300)
 fig.show()
@@ -489,14 +495,14 @@ ax.plot(R[z_slice], U_exact_R_N[tstep, z_slice,0], color=cm_analytic[4], marker=
 ax.plot(R[z_slice], U_exact_R_N_ST[tstep, z_slice,0], color=cm_analytic[4], marker='+', linestyle=' ',  label='Analytical ST, t* = ' + np.str(t_N[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[z_slice], U_R_N[tstep, z_slice], color=cm_numeric[5], label='Numerical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(R[z_slice], U_exact_R_N[tstep, z_slice,0], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t* = ' + np.str(t_N[tstep].ravel()) )
 ax.plot(R[z_slice], U_exact_R_N_ST[tstep, z_slice,0], color=cm_analytic[5], marker='+', linestyle=' ',  label='Analytical ST, t* = ' + np.str(t_N[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Radial Displacement, U*', title="Cryer's Problem: Normalized Radial Displacement Along Z Axis, Hex Mesh")
+ax.set(xlabel='Normalized Radial Distance, R*', ylabel='Normalized Radial Displacement, U*', title="Cryer's Problem: Normalized Radial Displacement Along Z Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_radial_displacement_along_z_axis_norm_hex.png',dpi = 300)
 fig.show()
@@ -537,14 +543,14 @@ ax.plot(R[z_slice], U_exact_R[tstep, z_slice,0], color=cm_analytic[4], marker='^
 ax.plot(R[z_slice], U_exact_R_ST[tstep, z_slice,0], color=cm_analytic[5], marker='+', linestyle=' ',  label='Analytical ST, t = ' + np.str(t[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[z_slice], U_R[tstep, z_slice], color=cm_numeric[5], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[z_slice], U_exact_R[tstep, z_slice,0], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[z_slice], U_exact_R_ST[tstep, z_slice,0], color=cm_analytic[5], marker='+', linestyle=' ',  label='Analytical ST, t = ' + np.str(t[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Radial Distance, R', ylabel='Radial Displacement, U', title="Cryer's Problem: Radial Displacement Along Z Axis, Hex Mesh")
+ax.set(xlabel='Radial Distance, R', ylabel='Radial Displacement, U', title="Cryer's Problem: Radial Displacement Along Z Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_radial_displacement_along_z_axis_hex.png',dpi = 300)
 fig.show()
@@ -580,13 +586,13 @@ ax.plot(R[x_slice], U[tstep, x_slice, 0], color=cm_numeric[4], label='Numerical,
 ax.plot(R[x_slice], U_exact[tstep, x_slice, 0], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[x_slice], U[tstep, x_slice, 0], color=cm_numeric[5], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[x_slice], U_exact[tstep, x_slice, 0], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Distance, X', ylabel='Displacement, U', title="Cryer's Problem: X Displacement Along X Axis, Hex Mesh")
+ax.set(xlabel='Distance, X', ylabel='Displacement, U', title="Cryer's Problem: X Displacement Along X Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_displacement_along_x_axis_hex.png',dpi = 300)
 fig.show()
@@ -622,13 +628,13 @@ ax.plot(R[y_slice], U[tstep, y_slice, 1], color=cm_numeric[4], label='Numerical,
 ax.plot(R[y_slice], U_exact[tstep, y_slice, 1], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[y_slice], U[tstep, y_slice, 1], color=cm_numeric[5], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[y_slice], U_exact[tstep, y_slice, 1], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Distance, Y', ylabel='Displacement, U', title="Cryer's Problem: Y Displacement Along Y Axis, Hex Mesh")
+ax.set(xlabel='Distance, Y', ylabel='Displacement, U', title="Cryer's Problem: Y Displacement Along Y Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_displacement_along_y_axis_hex.png',dpi = 300)
 fig.show()
@@ -664,13 +670,13 @@ ax.plot(R[z_slice], U[tstep, z_slice, 2], color=cm_numeric[4], label='Numerical,
 ax.plot(R[z_slice], U_exact[tstep, z_slice, 2], color=cm_analytic[4], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
 #t70
-tstep = -1
+tstep = 40
 ax.plot(R[z_slice], U[tstep, z_slice, 2], color=cm_numeric[5], label='Numerical, t = ' + np.str(t[tstep].ravel()) )
 ax.plot(R[z_slice], U_exact[tstep, z_slice, 2], color=cm_analytic[5], marker='^', linestyle=' ',  label='Analytical, t = ' + np.str(t[tstep].ravel()) )
 
 ax.grid()
 ax.legend(loc='best')
-ax.set(xlabel='Distance, Z', ylabel='Displacement, U', title="Cryer's Problem: Z Displacement Along Z Axis, Hex Mesh")
+ax.set(xlabel='Distance, Z', ylabel='Displacement, U', title="Cryer's Problem: Z Displacement Along Z Axis, Tet Mesh")
 fig.tight_layout()
 fig.savefig('output/cryer_displacement_along_z_axis_hex.png',dpi = 300)
 fig.show()

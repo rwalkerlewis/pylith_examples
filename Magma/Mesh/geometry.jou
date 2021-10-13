@@ -1,0 +1,53 @@
+#------------------------------------------------------------------------
+# Create magma chamber
+#------------------------------------------------------------------------
+
+create sphere radius {sphereRad}
+
+# Subtract a brick from the sphere 
+
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+
+subtract volume 2 from volume 1
+
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+
+# Create open shell
+
+surface 9 copy
+delete volume 1
+
+# Copy and reflect, then create a new volume
+
+surface 10 copy reflect z
+
+create volume surface 10 11 heal
+compress all
+
+# Move to the SMB depth
+
+volume 1 move x 0 y 0 z {-SMBdepth}
+
+#--------------------------------------------------------------------------
+# Create the domain, a single elastic block
+#--------------------------------------------------------------------------
+
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+
+compress all
+imprint all
+merge all
+
+#------------------------------------------------------------------------------
+# Subtract the volumes to make the chamber hollow
+#------------------------------------------------------------------------------
+
+subtract body 1 from body 2 keep
+##delete volume 3
+
+
+imprint all
+merge all 
+compress all

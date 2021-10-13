@@ -11,7 +11,7 @@ playback 'geometry.jou'
 # ----------------------------------------------------------------------
 # Set discretization size
 # ----------------------------------------------------------------------
-volume all size 0.1
+volume all size 0.06
 
 # ----------------------------------------------------------------------
 # Generate the mesh
@@ -35,3 +35,4 @@ playback 'bc.jou'
 # Export exodus file
 # ----------------------------------------------------------------------
 export mesh "mesh_tet.exo" dimension 3 overwrite
+

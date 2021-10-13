@@ -291,7 +291,7 @@ def mandel_zeros_python(nu, nu_u, n_series=50):
 # ==============================================================================
 
 # ==============================================================================
-f = h5py.File('./output/mandel_quad-domain.h5','r')
+f = h5py.File('./output/step01_quad-poroelastic.h5','r')
 
 t = f['time'][:]
 t = t.ravel()

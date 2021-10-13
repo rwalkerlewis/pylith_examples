@@ -1,0 +1,51 @@
+#---------------------------------------------------------------------------
+# Set element sizes and mesh the geometry
+#---------------------------------------------------------------------------
+
+${upperChamberSize=1.0*km}
+${lowerChamberSize=3.0*km}
+${faceSize=20.0*km}
+
+# Mesh the chamber
+
+surface 1 2 scheme triadvance
+surface 1 size {upperChamberSize}
+surface 2 size {lowerChamberSize}
+
+mesh surface 1 2
+
+# Set mesh sizes at other surfaces
+
+surface 3 scheme trimesh
+surface 3 size {faceSize}
+mesh surface 3
+
+surface 4 scheme trimesh
+surface 4 size {faceSize}
+mesh surface 4
+
+surface 5 scheme trimesh
+surface 5 size {faceSize}
+mesh surface 5
+
+surface 6 scheme trimesh
+surface 6 size {faceSize}
+mesh surface 6
+
+surface 7 scheme trimesh
+surface 7 size {faceSize}
+mesh surface 7
+
+surface 8 scheme trimesh
+surface 8 size {faceSize}
+mesh surface 8
+
+# Mesh the volume
+
+volume all scheme tetmesh
+mesh volume all
+
+# Smooth
+
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all

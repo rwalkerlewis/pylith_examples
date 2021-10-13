@@ -14,9 +14,9 @@ nx = 60
 ny = 220
 nz = 85
 
-dx = 20. / 0.3048
-dy = 10. / 0.3048
-dz = 2. / 0.3048
+dx = 20.
+dy = 10. 
+dz = 2. 
 
 # Select which layer in xy plane
 zval = 0
@@ -58,18 +58,22 @@ y_n = numpy.arange(0, ny*dy + dy, dy)
 # Domain, centroid
 x = numpy.arange(0, nx*dx, dx) + dx/2
 y = numpy.arange(0, ny*dy, dy) + dy/2
+x2, y2 = numpy.meshgrid(x,y)
 npts_x = x.shape[0]
-npts_y = y.shape[0]        
+npts_y = y.shape[0]
 
-xx = x.reshape([1, x.shape[0]]) * numpy.ones([ny ,1])
-yy = y.reshape([y.shape[0], 1]) * numpy.ones([1, nx])
+# xx = x.reshape([1, x.shape[0]]) * numpy.ones([ny ,1])
+# yy = y.reshape([y.shape[0], 1]) * numpy.ones([1, nx])
 xy = numpy.zeros((npts_x*npts_y, 2), dtype=numpy.float64)
-xy[:, 0] = numpy.ravel(xx)
-xy[:, 1] = numpy.ravel(numpy.transpose(yy))
+# xy[:, 0] = numpy.ravel(xx)
+# xy[:, 1] = numpy.ravel(numpy.transpose(yy))
+xy[:, 0] = x2.ravel()
+xy[:, 1] = y2.ravel()
 
 
 # Checkerboard
-factor = 20
+
+factor = 10
 nx_check = np.int32(nx/factor)
 ny_check = np.int32(ny/factor)
 

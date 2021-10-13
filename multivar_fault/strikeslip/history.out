@@ -1,0 +1,721 @@
+    1  cd Downloads/
+    2  ls
+    3  sudo dpkg -i google-chrome-stable_current_amd64.deb 
+    4  hwinfo --gfxcard
+    5  sudo apt-get install hwinfo
+    6  hwinfo --gfxcard
+    7  hwinfo --gfxcard --short
+    8  cd Downloads/
+    9  sudo dpkg -i slack-desktop-4.19.2-amd64.deb 
+   10  cd Downloads/
+   11  ls
+   12  chmod +x NVIDIA-Linux-x86_64-410.93.run 
+   13  ./NVIDIA-Linux-x86_64-410.93.run 
+   14  sudo ./NVIDIA-Linux-x86_64-410.93.run 
+   15  sudp apt-get install synaptic
+   16  sudo apt-get install synaptic
+   17  sudo add-apt-repository ppa:atareao/telegram
+   18  cd Downloads/
+   19  ls
+   20  cd tsetup.2.9.2/
+   21  ls
+   22  cd Telegram/
+   23  ls
+   24  ./Telegram 
+   25  ubuntu-drivers devices
+   26  sudo apt-get install nvidia-driver-470
+   27  sudo add-apt-repository ppa:micahflee/ppa
+   28  sudo apt-get install apt-transport-https gpgv
+   29  sudo dpkg --purge kxstudio-repos-gcc5
+   30  wget https://launchpad.net/~kxstudio-debian/+archive/kxstudio/+files/kxstudio-repos_10.0.3_all.deb
+   31  cd Downloads/
+   32  ls
+   33  sudo dpkg -i kxstudio-repos_10.0.3_all.deb 
+   34  sudo apt-get update
+   35  sudo dpkg -i code_1.59.1-1629375198_amd64.deb 
+   36  sudo apt install apt-transport-https
+   37  sudo apt update
+   38  sudo apt install code
+   39  cd pylith_ii/
+   40  ./installer.sh 
+   41  source setup.sh 
+   42  make
+   43  sudo apt-get install make
+   44  make
+   45  ls
+   46  rm -rf cig
+   47  make
+   48  rm -rf dependencies/
+   49  ls
+   50  cat config.sh
+   51  ls
+   52  rm -rf pylith/
+   53  rm -rf libtool 
+   54  ls
+   55  gg
+   56  exit
+   57  sudo add-apt-repository ppa:mixxx/mixxx
+   58  sudo add-apt-repository ppa:saiarcot895/flightgear-edge
+   59  sudo apt-get update
+   60  cd Downloads/
+   61  sudo dpkg -i zoom_amd64.deb 
+   62  sudo apt-get -f install
+   63  sudo dpkg -i zoom_amd64.deb 
+   64  cd pylith/
+   65  ./installer.sh 
+   66  ls
+   67  source setup.sh 
+   68  make
+   69  rm -rf dependencies/
+   70  ls
+   71  rm -rf pylith/
+   72  ls
+   73  rm -rf cig/
+   74  ls
+   75  rm config.*
+   76  ls
+   77  rm Makefile 
+   78  rm setup.sh 
+   79  rm libtool 
+   80  cd pylith/
+   81  ./installer.sh 
+   82  source setup.sh 
+   83  make
+   84  cd pylith/
+   85  rm -rf cig/ pylith/ dependencies/
+   86  rm config.*
+   87  ls
+   88  rm libtool 
+   89  ls
+   90  rm Makefile setup.sh 
+   91  ./installer.sh 
+   92  source setup.sh 
+   93  make
+   94  ls cig
+   95  rm -rf cig/pythia-master/
+   96  make
+   97  rm -rf pylith/ dependencies/ cig/
+   98  ls
+   99  rm config.*
+  100  rm libtool 
+  101  rm M
+  102  rm Makefile 
+  103  rm setup.sh 
+  104  cd pylith/
+  105  ./installer.sh 
+  106  source setup.sh 
+  107  make
+  108  ls
+  109  rm -rf cig/petsc-pylith/
+  110  ./installer.sh 
+  111  make
+  112  sudo add-apt-repository ppa:saiarcot895/flightgear-edge
+  113  sudo apt-get update
+  114  sudo add-apt-repository ppa:saiarcot895/flightgear-edge
+  115  sudo apt-get install git
+  116  sudo synaptic
+  117  sudo add-apt-repository ppa:librepilot/tools -y
+  118  sudo apt-get update -q
+  119  sudo apt-get install libc6-i386
+  120  sudo apt --fix-broken install
+  121  mkdir projects
+  122  cd projects/
+  123  git clone https://bitbucket.org/librepilot/librepilot.git
+  124  sudo apt-get install build-essential curl ccache debhelper git-core git-doc flex graphviz bison libudev-dev libusb-1.0-0-dev libsdl1.2-dev python libopenscenegraph-dev qt56-meta-minimal qt56svg qt56script qt56serialport qt56multimedia qt56translations qt56tools qt56quickcontrols libosgearth-dev openscenegraph-plugin-osgearth
+  125  sudo synaptic
+  126  sudo add-apt-repository ppa:librepilot/next
+  127  sudo apt-get install librepilot
+  128  sudo synaptic
+  129  sudo add-apt-repository ppa:librepilot/next
+  130  sudo add-apt-repository ppa:librepilot/release
+  131  sudo add-apt-repository ppa:librepilot/tools
+  132  cd Downloads/
+  133  sudo dpkg -i librepilot_16.09-0trusty1_amd64.deb 
+  134  sudo apt-get -f install
+  135  sudo dpkg -i librepilot_16.09-0trusty1_amd64.deb 
+  136  screen
+  137  sudo apt install screen
+  138  screen
+  139  screen -r
+  140  screen -h
+  141  cd projects
+  142  git clone https://github.com/QDeltaSoft/qradiopredict.git
+  143  sudo xkill
+  144  fgfs --h
+  145  fgfs --launcher
+  146  ssh-keygen -t ed25519 -C "langleyreview@gmail.com"
+  147  ssh-add ~/.ssh/id_ed25519
+  148  sudo apt-get update
+  149  sudo apt-get install xclip
+  150  cat .ssh/id_ed25519
+  151  xclip -selection clipboard < ~/.ssh/id_ed25519.pub
+  152  sudo synaptic
+  153  sudo dpkg --add-architecture i386 
+  154  wget -nc https://dl.winehq.org/wine-builds/winehq.key
+  155  sudo apt-key add winehq.key
+  156  sudo add-apt-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ focal main'
+  157  sudo synaptic
+  158  sudo add-apt-repository ppa:librepilot/tools
+  159  sudo synaptic
+  160  cd projects/
+  161  ls
+  162  ls librepilot/
+  163  cd librepilot/
+  164  ls
+  165  gedit tool_install.sh 
+  166  ./tool_install.sh 
+  167  sudo apt-get install build-essential curl ccache debhelper git-core git-doc flex graphviz bison libudev-dev libusb-1.0-0-dev libsdl1.2-dev python libopenscenegraph-dev qt56-meta-minimal qt56svg qt56script qt56serialport qt56multimedia qt56translations qt56tools qt56quickcontrols libosgearth-dev openscenegraph-plugin-osgearth
+  168  sudo apt-get install build-essential curl ccache debhelper git-core git-doc flex graphviz bison libudev-dev libusb-1.0-0-dev libsdl1.2-dev python libopenscenegraph-dev qt5-default qttools5-dev-tools libqt5svg5-dev qtdeclarative5-dev qml-module-qtquick-controls libqt5serialport5-dev qtmultimedia5-dev qtscript5-dev libqt5opengl5-dev qml-module-qtquick-controls qml-module-qtquick-dialogs qml-module-qtquick-xmllistmodel qml-module-qtquick-localstorage qml-module-qtquick-particles2 qml-module-qtquick-window2 qml-module-qtquick2 libosgearth-dev openscenegraph-plugin-osgearth
+  169  sudo apt-get install libc6-i386
+  170  git checkout next
+  171  make build_sdk_install 
+  172  sudo cp package/linux/45-uav.rules /etc/udev/rules.d/45-uav.rules
+  173  make fw_resource
+  174  make gcs
+  175  make -j4 gcs
+  176  git config --list --show-origin
+  177  git config --global user.name "Robert Walker"
+  178  git config --global user.email "langleyreview@gmail.com"
+  179  cd pylith/
+  180  source setup.sh 
+  181  cd cig/pylith-poroelasticity-rebase/
+  182  ls
+  183  git remote
+  184  git remote add upstream https://github.com/geodynamics/pylith
+  185  git remote -v
+  186  git fetch upstream
+  187  git branch
+  188  git rebase upstream/main 
+  189  git rebase --abort
+  190  man gcc
+  191  cd projects/
+  192  ls
+  193  cd librepilot/
+  194  ls
+  195  make gcs
+  196  make clean
+  197  export CFLAGS='-fpermissive'
+  198  make -j4 fw_resource 
+  199  make -j4 gcs
+  200  make gcs
+  201  make package
+  202  ls
+  203  ls ..
+  204  cd ..
+  205  sudo dpkg -i librepilot-dbgsym_16.09+r796~g7c9f04d~dirty-0focal1_amd64.ddeb 
+  206  cd librepilot/
+  207  ls
+  208  ls build/
+  209  sudo dpkg -i build/librepilot_16.09+r796~g7c9f04d~dirty-0focal1_amd64.deb 
+  210  sudo synaptic
+  211  ssh debian@192.168.7.2
+  212  sudo sysctl net.ipv4.ip_forward=1
+  213  sudo iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE
+  214  sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+  215  ip link
+  216  sudo sysctl net.ipv4.ip_forward=1
+  217  sudo iptables -t nat -A POSTROUTING -o enp0s31f6 -j MASQUERADE
+  218  sudo sysctl net.ipv4.ip_forward=1
+  219  sudo iptables -t nat -A POSTROUTING -o enx506583e56525 -j MASQUERADE
+  220  sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+  221  sudo iptables -A FORWARD -i enp0s20u7 -o eno1 -j ACCEPT
+  222  sudo iptables -A FORWARD -i enp0s31f6 -o sudo iptables -A FORWARD -i enp0s20u7 -o eno1 -j ACCEPT -j ACCEPT
+  223  sudo iptables -A FORWARD -i enp0s31f6 -o enx506583e56525 -j ACCEPT
+  224  ssh debian@192.168.7.2
+  225  ssh debian@192.168.1.242
+  226  ssh debian@192.168.1.242/24
+  227  ssh debian@192.168.1.242
+  228  ssh debian@192.168.1.242:24
+  229  ssh debian@192.168.1.242 -p 24
+  230  ssh debian@192.168.1.242
+  231  ssh debian@192.168.1.242 -p 24
+  232  ssh debian@192.168.7.2'
+  233  ssh debian@192.168.7.2
+  234  ssh debian@192.168.7.2
+  235  ssh debian@192.168.7.2
+  236  sudo usermod -a -G dialout dockimble
+  237  sudo apt-get remove modemmanager -y
+  238  sudo apt install gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl -y
+  239  cd Downloads/
+  240  chmod +x QGroundControl.AppImage 
+  241  ./QGroundControl.AppImage 
+  242  chmod +x balenaEtcher-1.5.121-x64.AppImage 
+  243  ./balenaEtcher-1.5.121-x64.AppImage 
+  244  ssh debian@192.168.7.1
+  245  ssh debian@192.168.7.2
+  246  ssh debian@192.168.1.244
+  247  ssh debian@192.168.7.2
+  248  sudo apt-get install nmap
+  249  nmap -sn 192.168.1.0/24
+  250  nmap -sP 192.168.1.*
+  251  sudo gparted
+  252  sudo apt-get install gparted
+  253  sudo gparted
+  254  ssh debian@192.168.7.2
+  255  nmap -sP 192.168.1.*
+  256  ssh debian@192.168.1.242
+  257  sudo add-apt-repository ppa:opentx-test/rel
+  258  cd Downloads/
+  259  ls
+  260  sudo dpkg -i companion23_2.3.14_amd64.deb 
+  261  companion23 
+  262  nmap -sP 192.168.1.*
+  263  ssh debian@192.168.1.242
+  264  ipython\
+  265  sudo apt-get install ipython3
+  266  ipython
+  267  ipython3
+  268  cd pylith/
+  269  source setup.sh 
+  270  ls
+  271  cd cig/
+  272  ls
+  273  cd pylith-build/
+  274  make
+  275  cd src
+  276  git clone https://github.com/geodynamics/pylith
+  277  git clone https://github.com/geodynamics/pylith_main
+  278  ssh debian@192.168.1.242
+  279  nmap -sP 192.168.1.*
+  280  nmap -sP 192.168.1.*
+  281  cd pylith/
+  282  source setup.sh 
+  283  cd cig/pylith-poroelasticity-rebase/
+  284  git remote -v
+  285  git rebase upstream/main 
+  286  git stash
+  287  git rebase upstream/main 
+  288  git rebase --abort
+  289  git rebase upstream/main 
+  290  git rebase --abort
+  291  git rebase upstream/main 
+  292  git remote -v
+  293  git rebase --continue
+  294  git am --show-current-patch
+  295  git rebase --continue
+  296  git rebase --skip
+  297  git rebase --continue
+  298  sudo dpkg -i openpilot_15.02.02-1_amd64.deb 
+  299  sudo apt --fix-broken install
+  300  sudo dpkg -i openpilot_15.02.02-1_amd64.deb 
+  301  sudo apt --fix-broken install
+  302  sudo dpkg -i openpilot_15.02.02-1_amd64.deb 
+  303  sudo apt --fix-broken install
+  304  sudo apt-get update
+  305  wine OpenPilot-RELEASE-15.02.02-win32.exe 
+  306  sudo synaptic
+  307  cd pylith/
+  308  source setup.sh 
+  309  cd cig/pylith-poroelasticity-rebase/
+  310  git branch
+  311  cd pylith/
+  312  source setup.sh 
+  313  cd cig/pylith-build/
+  314  ls
+  315  make
+  316  cd pylith/
+  317  source setup.sh 
+  318  cd cig/
+  319  cd pylith-poroelasticity-rebase/
+  320  ls
+  321  cd Downloads/
+  322  sudo dpkg -i betaflight-blackbox-explorer_3.5.0_amd64.deb 
+  323  sudo apt-get install libgconf-2-4 
+  324  sudo apt --fix-broken install
+  325  sudo dpkg -i betaflight-configurator_10.7.0_amd64.deb 
+  326  companion23 
+  327  cd Downloads/
+  328  sudo dpkg -i cleanflight-configurator_2.6.0_amd64.deb 
+  329  cd pylith/
+  330  source setup.sh 
+  331  cd cig/pylith-poroelasticity-rebase/
+  332  autoreconf -if
+  333  cd pylith/
+  334  source setup.sh 
+  335  cd cig/pylith-build/
+  336  make && make install
+  337  cd pylith/
+  338  source setup.sh 
+  339  cd cig/
+  340  ls
+  341  cd pylith-build/tests/mmstests/poroelasticity/
+  342  ls
+  343  make 
+  344  make test_isotropiclinearporoelasticity2d_QS_LT
+  345  make test_isotropiclinearporoelasticity2d_QS_TT
+  346  make test_isotropiclinearporoelasticity2d_TS_LT
+  347  make check
+  348  make clean
+  349  sudo apt-get update
+  350  sudo apt-get upgrade
+  351  echo $USER
+  352  sudo apt-get install python3-dev python3-opencv python3-wxgtk4.0 python3-pip python3-matplotlib python3-lxml python3-pygame
+  353  pip3 install PyYAML mavproxy --user
+  354  echo "export PATH=$PATH:$HOME/.local/bin" >> ~/.bashrc
+  355  sudo apt install mono-runtime libmono-system-windows-forms4.0-cil libmono-system-core4.0-cil libmono-winforms4.0-cil libmono-corlib4.0-cil libmono-system-management4.0-cil libmono-system-xml-linq4.0-cil
+  356  sudo apt-get install mono-complete
+  357  cd projects/missionplanner/
+  358  mono MissionPlanner.exe
+  359  cd projects/ardupilot/Tools/autotest/
+  360  ls
+  361  sudo apt-get install git
+  362  sudo apt-get install gitk git-gui
+  363  cd projects/
+  364  ls
+  365  git clone --recursive https://github.com/ArduPilot/ardupilot.git
+  366  sudo usermod -a -G dialout $USER
+  367  cd ardupilot/
+  368  Tools/environment_install/install-prereqs-ubuntu.sh -y
+  369  . ~/.profile 
+  370  ./waf configure --board sitl
+  371  ./waf heli
+  372  ls
+  373  ls -l
+  374  ls build/
+  375  ls ArduCopter/
+  376  ls ArduCopter/*.py
+  377  ls ArduCopter/*.h
+  378  ls build/
+  379  ls build/sitl/
+  380  ls build/sitl/ArduCopter/
+  381  ls build/sitl/ArduCopter/*.py
+  382  ./waf
+  383  ls
+  384  ls -l
+  385  ls -l ./build/
+  386  cd build/
+  387  ls
+  388  cd sitl/
+  389  ls
+  390  ls ArduCopter/
+  391  ls -l ArduCopter/
+  392  ls
+  393  ls bin
+  394  cd ../..
+  395  ls
+  396  sim_vehicle.py -h
+  397  sim_vehicle.py -w
+  398  cd ArduCopter/
+  399  sim_vehicle.py -w
+  400  sim_vehicle.py --console --map
+  401  sim_vehicle.py -h
+  402  sim_vehicle.py -h > sim_vehicle.opt
+  403  sim_vehicle.py --console --map -l CRAMS
+  404  sim_vehicle.py --console --map --location=CRAMS
+  405  sim_vehicle.py --console --map --location=KSFO
+  406  cd projects/missionplanner/
+  407  mono MissionPlanner.exe
+  408  cd projects/ardupilot/Tools/autotest/
+  409  ls
+  410  ./fg_quad_view.sh
+  411  cd projects/ardupilot/ArduCopter/
+  412  sim_vehicle.py --console --map --location=KSFO --osd
+  413  ../Tools/autotest/sim_vehicle.py --console --map --location=KSFO --osd
+  414  pip install --upgrade pymavlink MAVProxy --user
+  415  ../Tools/autotest/sim_vehicle.py -w
+  416  cd projects/ardupilot/ArduCopter/
+  417  cd ..
+  418  Tools/environment_install/install-prereqs-ubuntu.sh -y
+  419  cat ~/.profile 
+  420  gedit ~/.profile 
+  421  nice
+  422  nice -h
+  423  fgfs -h
+  424  fgfs -h -v
+  425  cd projects/missionplanner/
+  426  mono MissionPlanner.exe
+  427  cd ~/Mission\ Planner/
+  428  ls
+  429  cd ../projects/missionplanner/
+  430  . ~/.profile 
+  431  cd projects/ardupilot/
+  432  Tools/autotest/fg_quad_view.sh 
+  433  sudo apt-get install nmap
+  434  nmap 127.0.0.1
+  435  nmap localhost
+  436  nmap -T5 localhost
+  437  sudo nmap -sU --data-length=0 localhost
+  438  sudo nmap -sU -v 192.168.0.97
+  439  sudo nmap -sU -v 127.0.0.1
+  440  nmap -sU -v 127.0.0.1
+  441  sudo nmap -sU -v 127.0.0.1
+  442  . ~/.profile 
+  443  cd projects/ardupilot/ArduCopter/
+  444  sim_vehicle.py -w
+  445  sim_vehicle.py --console --map --location=KSFO --osd
+  446  sim_vehicle.py --console --map --location=KSFO --osdmsp --udp
+  447  sim_vehicle.py --console --map --location=KSFO --udp --osdmsp 
+  448  sim_vehicle.py --console --map --location=KSFO --udp --osd 
+  449  sim_vehicle.py --console --map --location=KSFO --udp --osd --mcast
+  450  sudo shutdown -h -P now
+  451  sudo apt-get install docker
+  452  docker volume create pylith-dev
+  453  sudo snap install docker
+  454  docker volume create pylith-dev
+  455  docker
+  456  docker volume create new
+  457  sudo groupadd docker
+  458  sudo usermod -aG docker $USER
+  459  docker run hello-world
+  460  cd pylith
+  461  source setup.sh 
+  462  ls
+  463  cd cig/pylith-build/tests/mmstests/poroelasticity/
+  464  ls
+  465  make clean
+  466  ls
+  467  rm test*
+  468  ls
+  469  make test_isotropiclinearporoelasticity2d_TS_LT
+  470  .libs/test_isotropiclinearporoelasticity2d_TS_LT 
+  471  make test_isotropiclinearporoelasticity2d_TS_LT
+  472  .libs/test_isotropiclinearporoelasticity2d_TS_LT 
+  473  make test_isotropiclinearporoelasticity3d
+  474  .libs/test_isotropiclinearporoelasticity3d 
+  475  make test_isotropiclinearporoelasticity3d
+  476  .libs/test_isotropiclinearporoelasticity3d 
+  477  make test_isotropiclinearporoelasticity3d
+  478  .libs/test_isotropiclinearporoelasticity3d 
+  479  make clean
+  480  .libs/test_isotropiclinearporoelasticity3d 
+  481  make test_isotropiclinearporoelasticity3d
+  482  .libs/test_isotropiclinearporoelasticity3d 
+  483  ipython
+  484  ipython3
+  485  cd pylith/
+  486  source setup.sh 
+  487  cd cig/pylith-build/
+  488  make && make installl
+  489  make && make install
+  490  docker -h
+  491  docker build --help
+  492  cd Documents/CCR/
+  493  sudo mv 2021-VPN-CA* /opt/.cisco/certificates/ca
+  494  ssh rwalker6@vortex.ccr.buffalo.edu
+  495  ssh -A rwalker6@vortex.ccr.buffalo.edu
+  496  ssh-keygen -t rsa -b 4096 -f ${HOME}/.ssh/id_rsa
+  497  ls
+  498  ssh-add ~/.ssh/id_rsa
+  499  ssh -A rwalker6@vortex.ccr.buffalo.edu
+  500  cd pylith/
+  501  source setup.sh 
+  502  cd examples/
+  503  ls
+  504  cd poroelasticity/
+  505  ls
+  506  cd SPE10/
+  507  ls
+  508  cd 2D/
+  509  ls
+  510  pylith step01_diffusion.cfg 
+  511  pylith -h
+  512  mpiexec n=3 pylith step01_diffusion.cfg 
+  513  mpirun pylith step01_diffusion.cfg 
+  514  mpirun -np 4 pylith step01_diffusion.cfg 
+  515  pylith step01_diffusion.cfg --nodes=4
+  516  pylith step01_diffusion.cfg 
+  517  cd Downloads/
+  518  tar xzvf anyconnect-linux64-4.10.01075-predeploy-k9.tar.gz 
+  519  cd anyconnect-linux64-4.10.01075/
+  520  ls
+  521  cd vpn
+  522  sudo ./vpn_install.sh 
+  523  sudo apt-get install virtualenv
+  524  virtualenv openstack
+  525  source openstack/bin/activate
+  526  pip install python-cinderclient
+  527  pip install python-openstackclient
+  528  pip install git+https://github.com/ubccr/v3oidcmokeyapikey.git
+  529  cd pylith/
+  530  source setup.sh 
+  531  cd cig/pylith-poroelasticity-rebase/
+  532  ls
+  533  autoreconf -if
+  534  man mpirun
+  535  sudo apt-get update
+  536  sudo apt-get upgrade
+  537  sudo apt-get autoremove
+  538  sudo apt-get upgrade
+  539  sudo apt-get install linux-modules-nvidia-470-generic-hwe-20.04
+  540  sudo synaptic
+  541  sudo apt-get install nvidia-driver-470
+  542  sudo apt-get reinstall nvidia-driver-470
+  543  sudo apt-get install linux-modules-nvidia-470-generic-hwe-20.04
+  544  sudo apt-get -f
+  545  sudo synaptic
+  546  sudo apt-get install linux-modules-nvidia-470-generic-hwe-20.04
+  547  sudo synaptic
+  548  ls
+  549  sudo dpkg -i Trelis-16.1.1-Lin64.deb 
+  550  ls
+  551  trelis/setup.sh 
+  552  screen
+  553  alsamixer
+  554  groups dockimble
+  555  sudo adduser dockimble audio
+  556  sudo usermod -a -G audio dockimble
+  557  cd pylith/
+  558  source setup.sh 
+  559  cd examples/poroelasticity/
+  560  ls
+  561  cd SPE10/
+  562  ls
+  563  cd 2D/
+  564  pylith step01_diffusion.cfg 
+  565  sudo apt install v4l2loopback-dkms
+  566  sudo synaptic
+  567  sudo apt-get install paraview
+  568  sudo apt-get remove --purge cleanflight-configurator 
+  569  sudo apt-get install paraview
+  570  sudo synaptic
+  571  pylith step01_diffusion.cfg 
+  572  screen
+  573  sudo killall pulseaudio 
+  574  ipython3
+  575  ipython3
+  576  sudo synaptic
+  577  ipython3
+  578  cd ../mandel
+  579  ipython
+  580  ipython3
+  581  cd ../cryer
+  582  ipython3
+  583  cd ../cryer_full/
+  584  ls
+  585  ipython
+  586  ipython3
+  587  cd pylith/
+  588  source setup.sh 
+  589  cd examples/
+  590  ls
+  591  cd poroelasticity/terzaghi
+  592  ls
+  593  pylith step00_quad.cfg 
+  594  pylith step00_tri.cfg 
+  595  pylith step00_quad.cfg 
+  596  cd ../mandel
+  597  ls
+  598  rm -rf output/
+  599  pylith step00_quad.cfg 
+  600  pylith step00_tri.cfg 
+  601  cd ../cryer
+  602  pylith step00_hex.cfg 
+  603  pylith step00_tet.cfg 
+  604  cd ../cryer_full/
+  605  ls
+  606  ipython3
+  607  cd pylith/examples/poroelasticity/cryer
+  608  ipython3
+  609  cd pylith/
+  610  source setup.sh 
+  611  cd examples/poroelasticity/mandel
+  612  ls
+  613  pylith step00_quad.cfg 
+  614  pylith step00_tri.cfg
+  615  cd ../cryer
+  616  ls
+  617  sudo killall -9 pulseaudio
+  618  pulseaudio -K
+  619  pulseaudio -k
+  620  killall -9 pulseaudio
+  621  pulseaudio -k
+  622  pulseaudio --kill
+  623  systemctl --user stop pulseaudio.socket
+  624  systemctl --user stop pulseaudio.service
+  625  pulseaudio --kill
+  626  alsamixer
+  627  pactl load-module module-jack-sink sink_name=voip_in client_name=voip_in 
+  628  cd pylith/
+  629  cd examples/
+  630  ls
+  631  cd poroelasticity/
+  632  ls
+  633  cd SPE10/2D/
+  634  ls
+  635  ipython3
+  636  cd pylith/
+  637  source setup.sh 
+  638  cd examples/
+  639  cd poroelasticity/
+  640  ls
+  641  cd SPE10/
+  642  ls
+  643  cd 2D
+  644  ls
+  645  pylith step01_diffusion.cfg 
+  646  ls
+  647  rm -rf output/
+  648  pylith step01_diffusion.cfg 
+  649  screen
+  650  sudo apt install paprefs 
+  651  pulseaudio -k
+  652  pulseaudio -D
+  653  pulseaudio -k
+  654  systemctl --user stop pulseaudio.service
+  655  systemctl --user stop pulseaudio.socket
+  656  pactl load-module module-jack-sink sink_name=voip_in client_name=voip_in 
+  657  pulseaudio --kill
+  658  pactl load-module module-jack-sink sink_name=voip_in client_name=voip_in 
+  659  sudo synaptic
+  660  screen
+  661  /bin/python -m pip install -U autopep8
+  662  sudo synaptric
+  663  sudo synaptic
+  664  cd pylith/
+  665  source setup.sh 
+  666  cd cig/pylith-poroelasticity-rebase/examples/2d/strikeslip/
+  667  pylith step01_slip.cfg 
+  668  cd ../..
+  669  cd 2d
+  670  ls
+  671  cd box
+  672  ls
+  673  pylith step01_axialdisp.cfg 
+  674  cd ..
+  675  cd reverse/
+  676  ls
+  677  pylith step01_gravity.cfg 
+  678  ls
+  679  cd ..
+  680  ls
+  681  cd strikeslip/
+  682  ls
+  683  pylith step01_slip.cfg 
+  684  cd ..
+  685  cd reverse/
+  686  ls
+  687  pylith step05_onefault.cfg 
+  688  cd pylith/
+  689  source setup.sh 
+  690  cd examples/multivar_fault/
+  691  cd strikeslip/
+  692  pylith step01_slip.cfg 
+  693  cd pylith/
+  694  source setup.sh 
+  695  cd cig/pylith-build/
+  696  make && make install
+  697  make clean
+  698  make && make install
+  699  cd pylith/
+  700  source setup.sh 
+  701  cd cig/pylith-poroelasticity-rebase/
+  702  autoreconf -if
+  703  cd pylith
+  704  source setup.sh 
+  705  cd examples/multivar_fault/strikeslip/
+  706  ls
+  707  pylith step01_slip.cfg 
+  708  cd ../..
+  709  cd ..
+  710  cd cig/pylith-poroelasticity-rebase/examples/2d/reverse/
+  711  ls
+  712  pylith step05_onefault.cfg 
+  713  cd ../..
+  714  cd ..
+  715  cd ../..
+  716  cd examples/multivar_fault/strikeslip/
+  717  pylith step01_slip.cfg 
+  718  gdb pylith step01_slip.cfg 
+  719* gdb --args pylith step01_slip.cfg
+  720  gdb pylith
+  721  history > history.out

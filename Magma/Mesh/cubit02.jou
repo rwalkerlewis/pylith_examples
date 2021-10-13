@@ -1,0 +1,1017 @@
+## /opt/Trelis-16.1/bin/trelis
+## Trelis Version 16.1.1
+## Trelis Build 1b15f60
+## Revised Tue Aug 23 16:17:41 2016 -0600
+## Running 08/11/2021 08:58:53 AM
+## Command Options:
+# ----------------------------------------------------------------------
+# Magma chamber at a 20 km depth in an elastic half space
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/Mesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+${SMBdepth=20.0*km}
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+${$minorLength=0.5*km}
+${majorLength=25.0*km}
+${sphereRad=156.5*km}
+# Domain size parameters
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+#----------------------------------------------------------------------------------------
+# Play journal files
+#----------------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# Create magma chamber
+#------------------------------------------------------------------------
+create sphere radius {sphereRad}
+# Subtract a brick from the sphere 
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+# Create open shell
+surface 9 copy
+delete volume 1
+# Copy and reflect, then create a new volume
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to the SMB depth
+volume 1 move x 0 y 0 z {-SMBdepth}
+#--------------------------------------------------------------------------
+# Create the domain, a single elastic block
+#--------------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+compress all
+imprint all
+merge all
+#------------------------------------------------------------------------------
+# Subtract the volumes to make the chamber hollow
+#------------------------------------------------------------------------------
+subtract body 1 from body 2 keep
+delete volume 3
+imprint all
+merge all
+compress all
+#---------------------------------------------------------------------------
+# Set element sizes and mesh the geometry
+#---------------------------------------------------------------------------
+${upperChamberSize=1.0*km}
+${lowerChamberSize=3.0*km}
+# Mesh the chamber
+surface 1 2 scheme triadvance
+surface 1 size {upperChamberSize}
+surface 2 size {lowerChamberSize}
+mesh surface 1 2
+# Set mesh sizes at other surfaces
+surface 3 scheme trimesh
+surface 3 size 10000
+mesh surface 3
+surface 4 scheme trimesh
+surface 4 size 10000
+mesh surface 4
+surface 5 scheme trimesh
+surface 5 size 10000
+mesh surface 5
+surface 6 scheme trimesh
+surface 6 size 10000
+mesh surface 6
+surface 7 scheme trimesh
+surface 7 size 10000
+mesh surface 7
+surface 8 scheme trimesh
+surface 8 size 10000
+mesh surface 8
+# Mesh the volume
+volume all scheme tetmesh
+mesh volume all
+# Smooth
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all
+# ----------------------------------------------------------------------------------------------
+# Create Boundary Conditions
+#----------------------------------------------------------------------------------------------
+#Create blocks for materials
+#create volume surface  8
+block 1 volume 2
+block 1 name "elasticMedium"
+block 2 volume 1
+block 2 name "chamber"
+imprint all
+merge all
+compress all
+# Chamber nodesets
+group "chamber" add node in surface 1
+nodeset 1 chamber
+nodeset 1 name "chamber"
+# +x face nodeset
+group "face_xpos" add node in surface 8
+nodeset 2 face_xpos
+nodeset 2 name "face_xpos"
+# -x face nodeset
+group "face_xneg" add node in surface 6
+nodeset 3 face_xneg
+nodeset 3 name "face_xneg"
+# +y face nodeset
+group "face_ypos" add node in surface 7
+nodeset 4 face_ypos
+nodeset 4 name "face_ypos"
+# -y face nodeset
+group "face_yneg" add node in surface 5
+nodeset 5 face_yneg
+nodeset 5 name "face_yneg"
+# +z face nodeset
+group "face_zpos" add node in surface 3
+nodeset 6 face_zpos
+nodeset 6 name "face_zpos"
+# -z face nodeset
+group "face_zneg" add node in surface 4
+nodeset 7 face_zneg
+nodeset 7 name "face_zneg"
+#-----------------------------------------------------------------------------------------
+# Export the mesh
+#-----------------------------------------------------------------------------------------
+export mesh "OneLayerElastic.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Horizontal crack (magma chamber) at 20 km depth
+# in a layered half-space with a viscoelasitc cylindrical 
+# shell above
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/OldMesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+# Domain size parameters
+#{sizeX=500.0*km}
+#{sizeY=500.0*km}
+#{sizeZ=300.0*km}
+# Viscoelastic cylinder parameters
+# ----------------------------------------------------------------------
+# Run an ordered sequence of journal files 
+# ----------------------------------------------------------------------
+# Choose radius such that the total length across the
+# magma chamber is 50 km and the minor height is 1 km 
+create sphere radius {sphereRad}
+# Subtract a brick from the sphere
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+# Create open shell
+surface 9 copy
+delete volume 1
+# Copy/reflect + create a volume + compress
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to depth of actual SMB
+volume 1 move x 0 y 0 z {-SMBdepth}
+# ----------------------------------------------------------------------
+# Create viscoelastic cylinder 
+# ----------------------------------------------------------------------
+create cylinder height {cylHeight} radius {cylRad}
+# Translate cylinder so the top is at z=0
+volume 2 move x 0 y 0 z {-SMBdepth+0.5*cylHeight}
+subtract body 1 from body 2 imprint keep
+delete volume 2
+compress all
+imprint all
+merge all
+# ----------------------------------------------------------------------
+# Create layered domain 
+# ----------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 3 move x 0 y 0 z {-0.5*sizeZ}
+surface 9 10 11 12 13 copy
+delete volume 3
+create surface circle radius {2.0*cylRad} zplane
+create surface curve 24 28 32 36 37
+compress all
+imprint all
+merge all
+create volume surface 6 7 8 9 10 11 12 heal
+compress all
+webcut volume 3 with plane zplane offset -10000
+webcut volume 4 with plane zplane offset -30000
+compress all
+imprint all
+merge all
+# Subtract volume to create hollow ones 
+subtract body 1 from body 2 keep
+delete volume 2
+subtract body 1 6 from body 4 keep
+delete body 1 4
+imprint all
+merge all
+compress all
+# ----------------------------------------------------------------------
+# Mesh the geometry  
+# ----------------------------------------------------------------------
+# Mesh the chamber
+surface 3 15 17 18 scheme triadvance
+surface 15 17 size {upperChamberSize}
+surface 3 size {1.2*upperChamberSize}
+surface 18 size {lowerChamberSize}
+mesh surface 3 15 17 18
+# Mesh the viscoelastic cylinder
+surface 1 16 scheme triadvance
+surface 16 size {upperChamberSize}
+mesh surface 1 16
+# Set sizes at layer boundaries
+surface 4 scheme trimesh
+surface 4 size 10000
+mesh surface 4
+surface 14 scheme trimesh
+surface 14 size 10000
+mesh surface 14
+surface 9 scheme trimesh
+surface 9 size 10000
+mesh surface 9
+# Mesh volume! 
+volume all scheme tetmesh
+mesh volume all
+# Smooth 
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all
+# ----------------------------------------------------------------------
+# Create blocks for materials
+# ----------------------------------------------------------------------
+block 1 volume 1
+block 1 name "topLayer"
+block 2 volume 4
+block 2 name "midLayer"
+block 3 volume 2
+block 3 name "botLayer"
+block 4 volume 3
+block 4 name "weakPatch"
+# ----------------------------------------------------------------------
+# Create chamber nodeset
+# ----------------------------------------------------------------------
+group "chamber" add node in surface 15 17 18
+nodeset 10 chamber
+nodeset 10 name "chamber"
+# ----------------------------------------------------------------------
+# Create nodeset for +x face
+# ----------------------------------------------------------------------
+group "face_xpos" add node in surface 8 11 21
+nodeset 11 face_xpos
+nodeset 11 name "face_xpos"
+# ----------------------------------------------------------------------
+# Create nodeset for -x face
+# ----------------------------------------------------------------------
+group "face_xneg" add node in surface 6 13 19
+nodeset 12 face_xneg
+nodeset 12 name "face_xneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +y face
+# ----------------------------------------------------------------------
+group "face_ypos" add node in surface 5 10 22
+nodeset 13 face_ypos
+nodeset 13 name "face_ypos"
+# ----------------------------------------------------------------------
+# Create nodeset for -y face
+# ----------------------------------------------------------------------
+group "face_yneg" add node in surface 7 12 20
+nodeset 14 face_yneg
+nodeset 14 name "face_yneg"
+# ----------------------------------------------------------------------
+# Create nodeset for -z face
+# ----------------------------------------------------------------------
+group "face_zneg" add node in surface 2
+nodeset 15 face_zneg
+nodeset 15 name "face_zneg"
+# ----------------------------------------------------------------------
+# Create nodeset for +z face
+# ----------------------------------------------------------------------
+group "face_zpos" add node in surface 3 4
+nodeset 16 face_zpos
+nodeset 16 name "face_zpos"
+# ----------------------------------------------------------------------
+# Export the mesh
+# ----------------------------------------------------------------------
+export mesh "testMesh.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Magma chamber at a 20 km depth in an elastic half space
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/Mesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+${SMBdepth=20.0*km}
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+${$minorLength=0.5*km}
+${majorLength=25.0*km}
+${sphereRad=156.5*km}
+# Domain size parameters
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+#----------------------------------------------------------------------------------------
+# Play journal files
+#----------------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# Create magma chamber
+#------------------------------------------------------------------------
+create sphere radius {sphereRad}
+# Subtract a brick from the sphere 
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+# Create open shell
+surface 9 copy
+delete volume 1
+# Copy and reflect, then create a new volume
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to the SMB depth
+volume 1 move x 0 y 0 z {-SMBdepth}
+#--------------------------------------------------------------------------
+# Create the domain, a single elastic block
+#--------------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+compress all
+imprint all
+merge all
+#------------------------------------------------------------------------------
+# Subtract the volumes to make the chamber hollow
+#------------------------------------------------------------------------------
+subtract body 1 from body 2 keep
+delete volume 3
+imprint all
+merge all
+compress all
+#---------------------------------------------------------------------------
+# Set element sizes and mesh the geometry
+#---------------------------------------------------------------------------
+${upperChamberSize=1.0*km}
+${lowerChamberSize=3.0*km}
+# Mesh the chamber
+surface 1 2 scheme triadvance
+surface 1 size {upperChamberSize}
+surface 2 size {lowerChamberSize}
+mesh surface 1 2
+# Set mesh sizes at other surfaces
+surface 3 scheme trimesh
+surface 3 size 10000
+mesh surface 3
+surface 4 scheme trimesh
+surface 4 size 10000
+mesh surface 4
+surface 5 scheme trimesh
+surface 5 size 10000
+mesh surface 5
+surface 6 scheme trimesh
+surface 6 size 10000
+mesh surface 6
+surface 7 scheme trimesh
+surface 7 size 10000
+mesh surface 7
+surface 8 scheme trimesh
+surface 8 size 10000
+mesh surface 8
+# Mesh the volume
+volume all scheme tetmesh
+mesh volume all
+# Smooth
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all
+# ----------------------------------------------------------------------------------------------
+# Create Boundary Conditions
+#----------------------------------------------------------------------------------------------
+#Create blocks for materials
+#create volume surface  8
+block 1 volume 2
+block 1 name "elasticMedium"
+block 2 volume 1
+block 2 name "chamber"
+imprint all
+merge all
+compress all
+# Chamber nodesets
+group "chamber" add node in surface 1
+nodeset 1 chamber
+nodeset 1 name "chamber"
+# +x face nodeset
+group "face_xpos" add node in surface 8
+nodeset 2 face_xpos
+nodeset 2 name "face_xpos"
+# -x face nodeset
+group "face_xneg" add node in surface 6
+nodeset 3 face_xneg
+nodeset 3 name "face_xneg"
+# +y face nodeset
+group "face_ypos" add node in surface 7
+nodeset 4 face_ypos
+nodeset 4 name "face_ypos"
+# -y face nodeset
+group "face_yneg" add node in surface 5
+nodeset 5 face_yneg
+nodeset 5 name "face_yneg"
+# +z face nodeset
+group "face_zpos" add node in surface 3
+nodeset 6 face_zpos
+nodeset 6 name "face_zpos"
+# -z face nodeset
+group "face_zneg" add node in surface 4
+nodeset 7 face_zneg
+nodeset 7 name "face_zneg"
+#-----------------------------------------------------------------------------------------
+# Export the mesh
+#-----------------------------------------------------------------------------------------
+export mesh "OneLayerElastic.exo" dimension 3 overwrite
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/Mesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+${SMBdepth=20.0*km}
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+${$minorLength=0.5*km}
+${majorLength=25.0*km}
+${sphereRad=156.5*km}
+# Domain size parameters
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+create sphere radius {sphereRad}
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+surface 9 copy
+delete volume 1
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+volume 1 move x 0 y 0 z {-SMBdepth}
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+compress all
+imprint all
+merge all
+subtract body 1 from body 2 keep
+delete volume 3
+imprint all
+merge all
+compress all
+# ----------------------------------------------------------------------
+# Magma chamber at a 20 km depth in an elastic half space
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/Mesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+${SMBdepth=20.0*km}
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+${$minorLength=0.5*km}
+${majorLength=25.0*km}
+${sphereRad=156.5*km}
+# Domain size parameters
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+#----------------------------------------------------------------------------------------
+# Play journal files
+#----------------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# Create magma chamber
+#------------------------------------------------------------------------
+create sphere radius {sphereRad}
+# Subtract a brick from the sphere 
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+# Create open shell
+surface 9 copy
+delete volume 1
+# Copy and reflect, then create a new volume
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to the SMB depth
+volume 1 move x 0 y 0 z {-SMBdepth}
+#--------------------------------------------------------------------------
+# Create the domain, a single elastic block
+#--------------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+compress all
+imprint all
+merge all
+#------------------------------------------------------------------------------
+# Subtract the volumes to make the chamber hollow
+#------------------------------------------------------------------------------
+subtract body 1 from body 2 keep
+delete volume 3
+imprint all
+merge all
+compress all
+#---------------------------------------------------------------------------
+# Set element sizes and mesh the geometry
+#---------------------------------------------------------------------------
+${upperChamberSize=1.0*km}
+${lowerChamberSize=3.0*km}
+# Mesh the chamber
+surface 1 2 scheme triadvance
+surface 1 size {upperChamberSize}
+surface 2 size {lowerChamberSize}
+mesh surface 1 2
+# Set mesh sizes at other surfaces
+surface 3 scheme trimesh
+surface 3 size 10000
+mesh surface 3
+surface 4 scheme trimesh
+surface 4 size 10000
+mesh surface 4
+surface 5 scheme trimesh
+surface 5 size 10000
+mesh surface 5
+surface 6 scheme trimesh
+surface 6 size 10000
+mesh surface 6
+surface 7 scheme trimesh
+surface 7 size 10000
+mesh surface 7
+surface 8 scheme trimesh
+surface 8 size 10000
+mesh surface 8
+# Mesh the volume
+volume all scheme tetmesh
+mesh volume all
+# Smooth
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all
+# ----------------------------------------------------------------------------------------------
+# Create Boundary Conditions
+#----------------------------------------------------------------------------------------------
+#Create blocks for materials
+#create volume surface  8
+block 1 volume 2
+block 1 name "elasticMedium"
+block 2 volume 1
+block 2 name "chamber"
+imprint all
+merge all
+compress all
+# Chamber nodesets
+group "chamber" add node in surface 1
+nodeset 1 chamber
+nodeset 1 name "chamber"
+# +x face nodeset
+group "face_xpos" add node in surface 8
+nodeset 2 face_xpos
+nodeset 2 name "face_xpos"
+# -x face nodeset
+group "face_xneg" add node in surface 6
+nodeset 3 face_xneg
+nodeset 3 name "face_xneg"
+# +y face nodeset
+group "face_ypos" add node in surface 7
+nodeset 4 face_ypos
+nodeset 4 name "face_ypos"
+# -y face nodeset
+group "face_yneg" add node in surface 5
+nodeset 5 face_yneg
+nodeset 5 name "face_yneg"
+# +z face nodeset
+group "face_zpos" add node in surface 3
+nodeset 6 face_zpos
+nodeset 6 name "face_zpos"
+# -z face nodeset
+group "face_zneg" add node in surface 4
+nodeset 7 face_zneg
+nodeset 7 name "face_zneg"
+#-----------------------------------------------------------------------------------------
+# Export the mesh
+#-----------------------------------------------------------------------------------------
+export mesh "OneLayerElastic.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Magma chamber at a 20 km depth in an elastic half space
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/Mesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+${SMBdepth=20.0*km}
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+${$minorLength=0.5*km}
+${majorLength=25.0*km}
+${sphereRad=156.5*km}
+# Domain size parameters
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+#----------------------------------------------------------------------------------------
+# Play journal files
+#----------------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# Create magma chamber
+#------------------------------------------------------------------------
+create sphere radius {sphereRad}
+# Subtract a brick from the sphere 
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+# Create open shell
+surface 9 copy
+delete volume 1
+# Copy and reflect, then create a new volume
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to the SMB depth
+volume 1 move x 0 y 0 z {-SMBdepth}
+#--------------------------------------------------------------------------
+# Create the domain, a single elastic block
+#--------------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+compress all
+imprint all
+merge all
+#------------------------------------------------------------------------------
+# Subtract the volumes to make the chamber hollow
+#------------------------------------------------------------------------------
+subtract body 1 from body 2 keep
+delete volume 3
+imprint all
+merge all
+compress all
+#---------------------------------------------------------------------------
+# Set element sizes and mesh the geometry
+#---------------------------------------------------------------------------
+${upperChamberSize=1.0*km}
+${lowerChamberSize=3.0*km}
+# Mesh the chamber
+surface 1 2 scheme triadvance
+surface 1 size {upperChamberSize}
+surface 2 size {lowerChamberSize}
+mesh surface 1 2
+# Set mesh sizes at other surfaces
+surface 3 scheme trimesh
+surface 3 size 10000
+mesh surface 3
+surface 4 scheme trimesh
+surface 4 size 10000
+mesh surface 4
+surface 5 scheme trimesh
+surface 5 size 10000
+mesh surface 5
+surface 6 scheme trimesh
+surface 6 size 10000
+mesh surface 6
+surface 7 scheme trimesh
+surface 7 size 10000
+mesh surface 7
+surface 8 scheme trimesh
+surface 8 size 10000
+mesh surface 8
+# Mesh the volume
+volume all scheme tetmesh
+mesh volume all
+# Smooth
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all
+# ----------------------------------------------------------------------------------------------
+# Create Boundary Conditions
+#----------------------------------------------------------------------------------------------
+#Create blocks for materials
+#create volume surface  8
+block 1 volume 2
+block 1 name "elasticMedium"
+block 2 volume 1
+block 2 name "chamber"
+imprint all
+merge all
+compress all
+# Chamber nodesets
+group "chamber" add node in surface 1
+nodeset 1 chamber
+nodeset 1 name "chamber"
+# +x face nodeset
+group "face_xpos" add node in surface 8
+nodeset 2 face_xpos
+nodeset 2 name "face_xpos"
+# -x face nodeset
+group "face_xneg" add node in surface 6
+nodeset 3 face_xneg
+nodeset 3 name "face_xneg"
+# +y face nodeset
+group "face_ypos" add node in surface 7
+nodeset 4 face_ypos
+nodeset 4 name "face_ypos"
+# -y face nodeset
+group "face_yneg" add node in surface 5
+nodeset 5 face_yneg
+nodeset 5 name "face_yneg"
+# +z face nodeset
+group "face_zpos" add node in surface 3
+nodeset 6 face_zpos
+nodeset 6 name "face_zpos"
+# -z face nodeset
+group "face_zneg" add node in surface 4
+nodeset 7 face_zneg
+nodeset 7 name "face_zneg"
+#-----------------------------------------------------------------------------------------
+# Export the mesh
+#-----------------------------------------------------------------------------------------
+export mesh "OneLayerElastic.exo" dimension 3 overwrite
+# ----------------------------------------------------------------------
+# Horizontal crack (magma chamber) at 20 km depth
+# in a layered half-space with a viscoelasitc cylindrical 
+# shell above
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/OldMesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+# Domain size parameters
+#{sizeX=500.0*km}
+#{sizeY=500.0*km}
+#{sizeZ=300.0*km}
+# Viscoelastic cylinder parameters
+create sphere radius {sphereRad}
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+surface 9 copy
+delete volume 1
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to depth of actual SMB
+volume 1 move x 0 y 0 z {-SMBdepth}
+# ----------------------------------------------------------------------
+# Create viscoelastic cylinder 
+# ----------------------------------------------------------------------
+create cylinder height {cylHeight} radius {cylRad}
+# Translate cylinder so the top is at z=0
+volume 2 move x 0 y 0 z {-SMBdepth+0.5*cylHeight}
+subtract body 1 from body 2 imprint keep
+delete volume 2
+compress all
+imprint all
+merge all
+# ----------------------------------------------------------------------
+# Create layered domain 
+# ----------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 3 move x 0 y 0 z {-0.5*sizeZ}
+surface 9 10 11 12 13 copy
+delete volume 3
+create surface circle radius {2.0*cylRad} zplane
+create surface curve 24 28 32 36 37
+compress all
+imprint all
+merge all
+create volume surface 6 7 8 9 10 11 12 heal
+compress all
+webcut volume 3 with plane zplane offset -10000
+webcut volume 4 with plane zplane offset -30000
+compress all
+imprint all
+merge all
+subtract body 1 from body 2 keep
+delete volume 2
+subtract body 1 6 from body 4 keep
+delete body 1 4
+imprint all
+merge all
+compress all
+# ----------------------------------------------------------------------
+# Magma chamber at a 20 km depth in an elastic half space
+# ----------------------------------------------------------------------
+reset
+undo off
+cd "/home/grant/Research/SMBPylith/Mesh"
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+${Units('si')}
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+${SMBdepth=20.0*km}
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+# a = 2 sqrt[ h (2*R - h) ]
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+${$minorLength=0.5*km}
+${majorLength=25.0*km}
+${sphereRad=156.5*km}
+# Domain size parameters
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+#----------------------------------------------------------------------------------------
+# Play journal files
+#----------------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# Create magma chamber
+#------------------------------------------------------------------------
+create sphere radius {sphereRad}
+# Subtract a brick from the sphere 
+brick x {2*sphereRad} y {2*sphereRad} z {2*sphereRad}
+move volume 2 x 0 y 0 z {-minorLength}
+subtract volume 2 from volume 1
+move volume 1 x 0 y 0 z {-sphereRad+minorLength}
+# Create open shell
+surface 9 copy
+delete volume 1
+# Copy and reflect, then create a new volume
+surface 10 copy reflect z
+create volume surface 10 11 heal
+compress all
+# Move to the SMB depth
+volume 1 move x 0 y 0 z {-SMBdepth}
+#--------------------------------------------------------------------------
+# Create the domain, a single elastic block
+#--------------------------------------------------------------------------
+create brick x {sizeX} y {sizeY} z {sizeZ}
+volume 2 move x 0 y 0 z {-0.5*sizeZ}
+compress all
+imprint all
+merge all
+#------------------------------------------------------------------------------
+# Subtract the volumes to make the chamber hollow
+#------------------------------------------------------------------------------
+subtract body 1 from body 2 keep
+delete volume 3
+imprint all
+merge all
+compress all
+#---------------------------------------------------------------------------
+# Set element sizes and mesh the geometry
+#---------------------------------------------------------------------------
+${upperChamberSize=1.0*km}
+${lowerChamberSize=3.0*km}
+# Mesh the chamber
+surface 1 2 scheme triadvance
+surface 1 size {upperChamberSize}
+surface 2 size {lowerChamberSize}
+mesh surface 1 2
+# Set mesh sizes at other surfaces
+surface 3 scheme trimesh
+surface 3 size 10000
+mesh surface 3
+surface 4 scheme trimesh
+surface 4 size 10000
+mesh surface 4
+surface 5 scheme trimesh
+surface 5 size 10000
+mesh surface 5
+surface 6 scheme trimesh
+surface 6 size 10000
+mesh surface 6
+surface 7 scheme trimesh
+surface 7 size 10000
+mesh surface 7
+surface 8 scheme trimesh
+surface 8 size 10000
+mesh surface 8
+# Mesh the volume
+volume all scheme tetmesh
+mesh volume all
+# Smooth
+volume all smooth scheme condition number beta 1.8 cpu 10
+smooth volume all
+# ----------------------------------------------------------------------------------------------
+# Create Boundary Conditions
+#----------------------------------------------------------------------------------------------
+#Create blocks for materials
+#create volume surface  8
+block 1 volume 2
+block 1 name "elasticMedium"
+block 2 volume 1
+block 2 name "chamber"
+imprint all
+merge all
+compress all
+# Chamber nodesets
+group "chamber" add node in surface 1
+nodeset 1 chamber
+nodeset 1 name "chamber"
+# +x face nodeset
+group "face_xpos" add node in surface 8
+nodeset 2 face_xpos
+nodeset 2 name "face_xpos"
+# -x face nodeset
+group "face_xneg" add node in surface 6
+nodeset 3 face_xneg
+nodeset 3 name "face_xneg"
+# +y face nodeset
+group "face_ypos" add node in surface 7
+nodeset 4 face_ypos
+nodeset 4 name "face_ypos"
+# -y face nodeset
+group "face_yneg" add node in surface 5
+nodeset 5 face_yneg
+nodeset 5 name "face_yneg"
+# +z face nodeset
+group "face_zpos" add node in surface 3
+nodeset 6 face_zpos
+nodeset 6 name "face_zpos"
+# -z face nodeset
+group "face_zneg" add node in surface 4
+nodeset 7 face_zneg
+nodeset 7 name "face_zneg"
+#-----------------------------------------------------------------------------------------
+# Export the mesh
+#-----------------------------------------------------------------------------------------
+export mesh "OneLayerElastic.exo" dimension 3 overwrite

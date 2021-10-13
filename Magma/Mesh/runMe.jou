@@ -1,0 +1,58 @@
+# ----------------------------------------------------------------------
+# Magma chamber at a 20 km depth in an elastic half space
+# ----------------------------------------------------------------------
+
+reset 
+undo off 
+
+cd "~/Research/SMBPylith/Mesh"
+
+# ----------------------------------------------------------------------
+# Set units to SI
+# ----------------------------------------------------------------------
+
+${Units('si')}
+
+# ----------------------------------------------------------------------
+# Set SMB geometry parameters
+# ----------------------------------------------------------------------
+
+${SMBdepth=20.0*km}
+
+# Choose radius of a sphere such that the total arc length across the
+# magma chamber is 50 km ("major length" = 25 km) and the 
+# "minor height" is 100 m (thin)
+#
+# a = 2 sqrt[ h (2*R - h) ]
+#
+# a = chord length (full distance across magma body :: to be set)
+# h = half-height of magma body (from top of body to center :: to be set)
+# R = radius of circle/sphere :: to be solved for
+
+${minorLength=2*km}
+${majorLength=25.0*km}
+
+${sphereRad=156.5*km}
+
+# Domain size parameters
+
+${sizeX=500.0*km}
+${sizeY=500.0*km}
+${sizeZ=300.0*km}
+
+#----------------------------------------------------------------------------------------
+# Play journal files
+#----------------------------------------------------------------------------------------
+
+playback 'geometry.jou'
+
+playback 'mesh_geometry.jou'
+
+playback 'createBCs.jou'
+
+
+#-----------------------------------------------------------------------------------------
+# Export the mesh
+#-----------------------------------------------------------------------------------------
+
+export mesh "OneLayerElastic.exo" dimension 3 overwrite
